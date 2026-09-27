@@ -8,18 +8,25 @@ const {
     getMe, 
     forgotPassword, 
     verifyResetOTP,
+    resetPassword,
 } = require("../controllers/auth.controller");
 
 const { requireAuth } = require("../middleware/auth.middleware");
 
+const {
+    authRateLimiter,
+    otpRateLimiter,
+} = require("../middleware/rateLimit.middleware");
+
 const router = express.Router();
 
-router.post("/register", register);
-router.post("/login", login);
-router.post("/verify-email", verifyEmail);
+router.post("/register", authRateLimiter, register);
+router.post("/login", authRateLimiter, login);
+router.post("/verify-email", otpRateLimiter, verifyEmail);
 router.post("/logout", logout);
-router.post("/forgot-password", forgotPassword);
-router.post("/verify-reset-otp", verifyResetOTP);
+router.post("/forgot-password", otpRateLimiter, forgotPassword);
+router.post("/verify-reset-otp", otpRateLimiter, verifyResetOTP);
+router.post("/reset-password", authRateLimiter, resetPassword);
 router.get("/me", requireAuth, getMe);
 
 module.exports = router;

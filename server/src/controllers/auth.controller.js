@@ -7,6 +7,8 @@ const OTP = require("../models/OTP");
 
 const Session = require("../models/Session");
 
+const { createAuditLog } = require("../services/audit.service");
+
 const {
     generateSessionToken,
     hashToken,
@@ -409,7 +411,7 @@ const forgotPassword = async (req, res) => {
         const codeHash = hashOTP(otp);
 
         const expiresAt = new Date(
-            Date.now() + 60 * 1000
+            Date.now() + 5 * 60 * 1000
         );
 
         await OTP.updateMany(
@@ -531,6 +533,68 @@ const verifyResetOTP = async (req, res) => {
 }; 
 
 
+const resetPassword = async (req, res) => {
+    try {
+        const { email, password } = req.body || {};
+
+        if (!email || !password) {
+            return res.status(400).json({
+                success: false,
+                message: "Email and new password are required",
+            });
+        }
+
+        if (password.length < 8) {
+            return res.status(400).json({
+                success: false,
+                message: "Password must be at least 8 characters",
+            });
+        }
+
+        const normalizedEmail = email.trim().toLowerCase();
+
+        const user = await User.findOne({
+            email: normalizedEmail,
+        });
+
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: "Unable to reset password",
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 12);
+
+        user.password = hashedPassword;
+        await user.save();
+
+        // Revoke all existing sessions after password reset
+        await Session.updateMany(
+            {
+                user: user._id,
+                revokedAt: null,
+            },
+            {
+                revokedAt: new Date(),
+            }
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Password reset successfully. Please login again.",
+        });
+    } catch (error) {
+        console.error("Reset password error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to reset password",
+        });
+    }
+};
+
+
 module.exports = {
     register,
     login,
@@ -539,4 +603,5 @@ module.exports = {
     getMe,
     forgotPassword,
     verifyResetOTP,
+    resetPassword,
 };

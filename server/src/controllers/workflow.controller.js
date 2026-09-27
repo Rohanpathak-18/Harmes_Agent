@@ -1,33 +1,33 @@
-const { transitionJob } = require("../services/workflow.service");
+const Job = require("../models/Job");
+const {
+    runJobWorkflow,
+} = require("../../../workflows/orchestrator/workflowRunner");
 
-const transition = async (req, res, next) => {
+const runWorkflow = async (req, res, next) => {
     try {
-        const { nextState } = req.body || {};
-        const { id } = req.params;
+        const job = await Job.findOne({
+            _id: req.params.id,
+            user: req.user._id,
+            organization: req.organization._id,
+        });
 
-        if (!nextState) {
-            return res.status(400).json({
+        if (!job) {
+            return res.status(404).json({
                 success: false,
-                message: "nextState is required",
+                message: "Job not found",
             });
         }
 
-        const job = await transitionJob(
-            id,
-            nextState,
-            req.user._id
+        const result = await runJobWorkflow(
+            job._id
         );
 
-        return res.status(200).json({
-            success: true,
-            message: `Job moved to ${nextState}`,
-            job,
-        });
+        res.json(result);
     } catch (error) {
         next(error);
     }
 };
 
 module.exports = {
-    transition,
+    runWorkflow,
 };

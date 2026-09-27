@@ -1,19 +1,24 @@
 const express = require("express");
 
 const {
-    transition,
-} = require("../controllers/workflow.controller");
+    requireAuth,
+} = require("../middleware/auth.middleware");
 
-const { requireAuth } = require("../middleware/auth.middleware");
 const {
     requireOrganization,
 } = require("../middleware/organization.middleware");
 
+const {
+    runWorkflow,
+} = require("../controllers/workflow.controller");
+
 const router = express.Router();
 
-router.use(requireAuth);
-router.use(requireOrganization);
-
-router.patch("/jobs/:id/state", transition);
+router.post(
+    "/jobs/:id/run",
+    requireAuth,
+    requireOrganization,
+    runWorkflow
+);
 
 module.exports = router;

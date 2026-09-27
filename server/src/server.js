@@ -5,6 +5,7 @@ const helmet = require("helmet");
 const cookieParser = require("cookie-parser");
 
 const connectDB = require("./config/database");
+const authRoutes = require("./routes/auth.routes");
 
 dotenv.config();
 
@@ -23,6 +24,8 @@ app.use(
 
 app.use(express.json());
 app.use(cookieParser());
+
+app.use("/api/auth", authRoutes);
 
 app.get("/", (req, res) => {
     res.json({

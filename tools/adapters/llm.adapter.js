@@ -17,10 +17,18 @@ const llmAdapter = {
         const text =
             await generateText({
                 prompt: input.prompt,
+
                 maxTokens:
-                    input.maxTokens || 1000,
+                    input.maxTokens || 2000,
+
                 temperature:
-                    input.temperature ?? 0.7,
+                    input.temperature ?? 0.3,
+
+                responseFormat:
+                    input.responseFormat || null,
+
+                reasoningEffort:
+                    input.reasoningEffort || "low",
             });
 
         return {

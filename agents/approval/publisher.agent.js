@@ -1,5 +1,4 @@
-const Agent =
-    require("../core/agent");
+const Agent = require("../core/agent");
 
 const {
     executeTool,
@@ -13,6 +12,9 @@ const Video =
 
 const Publication =
     require("../../server/src/models/Publication");
+
+const Approval =
+    require("../../server/src/models/Approval");
 
 class PublisherAgent extends Agent {
     constructor() {
@@ -44,9 +46,22 @@ class PublisherAgent extends Agent {
         }
 
         // HARD APPROVAL GATE
-        if (job.status !== "APPROVED") {
+        const approval =
+            await Approval.findOne({
+                job: job._id,
+                status: "approved",
+            });
+
+        if (!approval) {
             throw new Error(
-                "Publishing blocked: job is not approved"
+                "Publishing blocked: job has not been approved"
+            );
+        }
+
+        // Publisher should only process scheduled jobs.
+        if (job.status !== "SCHEDULED") {
+            throw new Error(
+                `Publishing blocked: job must be SCHEDULED, current status is ${job.status}`
             );
         }
 
@@ -114,5 +129,4 @@ class PublisherAgent extends Agent {
     }
 }
 
-module.exports =
-    PublisherAgent;
+module.exports = PublisherAgent;

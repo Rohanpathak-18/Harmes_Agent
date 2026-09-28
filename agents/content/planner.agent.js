@@ -1,42 +1,32 @@
 const Agent = require("../core/agent");
 
-const {
-    executeTool,
-} = require("../../tools/registry/toolBus");
+const { executeTool } = require("../../tools/registry/toolBus");
 
 const {
-    createContentPlan,
+  createContentPlan,
 } = require("../../server/src/services/content.service");
 
 class ContentPlannerAgent extends Agent {
-    constructor() {
-        super({
-            id: "content-planner-agent",
+  constructor() {
+    super({
+      id: "content-planner-agent",
 
-            name: "Content Planning Agent",
+      name: "Content Planning Agent",
 
-            capabilities: [
-                "content.plan",
-                "llm.generate",
-                "content.write",
-            ],
-        });
+      capabilities: ["content.plan", "llm.generate", "content.write"],
+    });
+  }
+
+  async execute(context) {
+    if (!context.jobId) {
+      throw new Error("Content Planner requires jobId");
     }
 
-    async execute(context) {
-        if (!context.jobId) {
-            throw new Error(
-                "Content Planner requires jobId"
-            );
-        }
+    if (!context.objective) {
+      throw new Error("Content Planner requires objective");
+    }
 
-        if (!context.objective) {
-            throw new Error(
-                "Content Planner requires objective"
-            );
-        }
-
-        const prompt = `
+    const prompt = `
 You are a professional YouTube content strategist.
 
 Create a YouTube content plan for this objective:
@@ -73,100 +63,91 @@ Required JSON structure:
 }
 `;
 
-        const result = await executeTool(
-            "llm-generate",
-            {
-                prompt,
-                maxTokens: 1200,
-                temperature: 0.2,
-            }
-        );
+    const result = await executeTool("llm-generate", {
+      prompt,
 
-        if (!result || !result.text) {
-            throw new Error(
-                "LLM returned empty content plan"
-            );
-        }
+      maxTokens: 2000,
 
-        let rawText = result.text;
+      temperature: 0.2,
 
-        if (typeof rawText !== "string") {
-            rawText = JSON.stringify(rawText);
-        }
+      reasoningEffort: "low",
 
-        // Remove markdown code fences
-        rawText = rawText
-            .replace(/```json/gi, "")
-            .replace(/```/g, "")
-            .trim();
+      responseFormat: {
+        type: "json_object",
+      },
+    });
 
-        let plan;
-
-        try {
-            // First attempt: direct JSON parsing
-            plan = JSON.parse(rawText);
-        } catch {
-            try {
-                // Second attempt:
-                // extract JSON object from surrounding text
-                const start = rawText.indexOf("{");
-                const end = rawText.lastIndexOf("}");
-
-                if (start === -1 || end === -1 || end <= start) {
-                    throw new Error(
-                        "No JSON object found in LLM response"
-                    );
-                }
-
-                const jsonText = rawText.slice(
-                    start,
-                    end + 1
-                );
-
-                plan = JSON.parse(jsonText);
-            } catch (error) {
-                console.error(
-                    "[CONTENT PLANNER] Invalid LLM response:"
-                );
-
-                console.error(rawText);
-
-                throw new Error(
-                    `LLM returned invalid content plan JSON: ${error.message}`
-                );
-            }
-        }
-
-        // Validate required fields
-        if (
-            !plan.title ||
-            !plan.angle ||
-            !plan.audience ||
-            !plan.format ||
-            !Array.isArray(plan.outline) ||
-            !Array.isArray(plan.keywords)
-        ) {
-            throw new Error(
-                "LLM content plan is missing required fields"
-            );
-        }
-
-        const contentPlan =
-            await createContentPlan({
-                jobId: context.jobId,
-                objective: context.objective,
-                plan,
-            });
-
-        return {
-            agent: this.id,
-            success: true,
-            contentPlanId:
-                contentPlan._id,
-            plan,
-        };
+    if (!result || !result.text) {
+      throw new Error("LLM returned empty content plan");
     }
+
+    let rawText = result.text;
+
+    if (typeof rawText !== "string") {
+      rawText = JSON.stringify(rawText);
+    }
+
+    // Remove markdown code fences
+    rawText = rawText
+      .replace(/```json/gi, "")
+      .replace(/```/g, "")
+      .trim();
+
+    let plan;
+
+    try {
+      // First attempt: direct JSON parsing
+      plan = JSON.parse(rawText);
+    } catch {
+      try {
+        // Second attempt:
+        // extract JSON object from surrounding text
+        const start = rawText.indexOf("{");
+        const end = rawText.lastIndexOf("}");
+
+        if (start === -1 || end === -1 || end <= start) {
+          throw new Error("No JSON object found in LLM response");
+        }
+
+        const jsonText = rawText.slice(start, end + 1);
+
+        plan = JSON.parse(jsonText);
+      } catch (error) {
+        console.error("[CONTENT PLANNER] Invalid LLM response:");
+
+        console.error(rawText);
+
+        throw new Error(
+          `LLM returned invalid content plan JSON: ${error.message}`,
+        );
+      }
+    }
+
+    // Validate required fields
+    if (
+      !plan.title ||
+      !plan.angle ||
+      !plan.audience ||
+      !plan.format ||
+      !Array.isArray(plan.outline) ||
+      !Array.isArray(plan.keywords)
+    ) {
+      throw new Error("LLM content plan is missing required fields");
+    }
+
+    const contentPlan = await createContentPlan({
+      jobId: context.jobId,
+      objective: context.objective,
+      plan,
+    });
+
+    return {
+      agent: this.id,
+      success: true,
+      contentPlanId: contentPlan._id,
+      plan,
+    };
+  }
 }
 
-module.exports =
-    ContentPlannerAgent;
+module.exports = ContentPlannerAgent;

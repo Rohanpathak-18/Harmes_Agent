@@ -12,32 +12,64 @@ const MODEL =
 
 const generateText = async ({
     prompt,
-    maxTokens = 1000,
-    temperature = 0.7,
+    maxTokens = 2000,
+    temperature = 0.3,
+    responseFormat = null,
+    reasoningEffort = "low",
 }) => {
     if (!process.env.HF_TOKEN) {
         throw new Error("HF_TOKEN is missing");
     }
 
+    const request = {
+        model: MODEL,
+
+        messages: [
+            {
+                role: "user",
+                content: prompt,
+            },
+        ],
+
+        max_tokens: maxTokens,
+        temperature,
+        reasoning_effort: reasoningEffort,
+    };
+
+    if (responseFormat) {
+        request.response_format = responseFormat;
+    }
+
     const result =
-        await hf.chatCompletion({
-            model: MODEL,
+        await hf.chatCompletion(request);
 
-            messages: [
-                {
-                    role: "user",
-                    content: prompt,
-                },
-            ],
+    const message =
+        result.choices?.[0]?.message;
 
-            max_tokens: maxTokens,
-            temperature,
-        });
+    const text =
+        message?.content?.trim() || "";
 
-    return (
-        result.choices?.[0]?.message?.content ||
-        ""
-    );
+    if (!text) {
+        console.error(
+            "[HUGGINGFACE] Empty LLM content"
+        );
+
+        console.error(
+            "[HUGGINGFACE] Finish reason:",
+            result.choices?.[0]?.finish_reason
+        );
+
+        console.error(
+            "[HUGGINGFACE] Message keys:",
+            Object.keys(message || {})
+        );
+
+        throw new Error(
+            "Hugging Face returned an empty LLM response"
+        );
+    }
+
+    return text;
 };
 
 module.exports = {

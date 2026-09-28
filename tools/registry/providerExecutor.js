@@ -1,9 +1,17 @@
 const { getProviders } = require("./toolRegistry");
 
-const executeWithFallback = async (capability, input, context = {}) => {
+const executeWithFallback = async (
+    capability,
+    input,
+    context = {}
+) => {
     const providers = getProviders(capability)
         .filter((provider) => provider.enabled !== false)
-        .sort((a, b) => (a.priority || 999) - (b.priority || 999));
+        .sort(
+            (a, b) =>
+                (a.priority || 999) -
+                (b.priority || 999)
+        );
 
     if (!providers.length) {
         throw new Error(
@@ -21,10 +29,28 @@ const executeWithFallback = async (capability, input, context = {}) => {
 
             const result = await provider.execute(input, context);
 
-            console.log(`Provider ${provider.id} succeeded`);
+            console.log(
+                `Provider ${provider.id} succeeded`
+            );
+
+            if (typeof result === "string") {
+                return {
+                    success: true,
+                    text: result,
+                    provider: provider.id,
+                };
+            }
+
+            if (result && typeof result === "object") {
+                return {
+                    ...result,
+                    provider: provider.id,
+                };
+            }
 
             return {
-                ...result,
+                success: true,
+                result,
                 provider: provider.id,
             };
         } catch (error) {

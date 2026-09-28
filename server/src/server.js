@@ -5,11 +5,15 @@ const helmet = require("helmet");
 const cookieParser = require("cookie-parser");
 
 const connectDB = require("./config/database");
+
+require("./bootstrap");
+
 const authRoutes = require("./routes/auth.routes");
 const jobRoutes = require("./routes/job.routes");
 const workflowRoutes = require("./routes/workflow.routes");
 const approvalRoutes = require("./routes/approval.routes");
 const publicationRoutes = require("./routes/publication.routes");
+const { errorHandler } = require("./middleware/error.middleware");
 
 dotenv.config();
 
@@ -34,6 +38,7 @@ app.use("/api/jobs", jobRoutes);
 app.use("/api/workflow", workflowRoutes);
 app.use("/api/approval", approvalRoutes);
 app.use("/api/publications", publicationRoutes);
+app.use(errorHandler);
 
 app.get("/", (req, res) => {
   res.json({

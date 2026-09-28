@@ -1,28 +1,21 @@
 const AuditLog = require("../models/AuditLog");
 
 const createAuditLog = async ({
-    user = null,
-    organization = null,
+    userId = null,
+    organizationId = null,
     action,
-    resourceType = null,
+    resourceType = "",
     resourceId = null,
-    req = null,
     metadata = {},
 }) => {
-    try {
-        await AuditLog.create({
-            user,
-            organization,
-            action,
-            resourceType,
-            resourceId,
-            ipAddress: req?.ip || null,
-            userAgent: req?.headers?.["user-agent"] || null,
-            metadata,
-        });
-    } catch (error) {
-        console.error("Audit log error:", error.message);
-    }
+    return await AuditLog.create({
+        user: userId,
+        organization: organizationId,
+        action,
+        resourceType,
+        resourceId,
+        metadata,
+    });
 };
 
 module.exports = {

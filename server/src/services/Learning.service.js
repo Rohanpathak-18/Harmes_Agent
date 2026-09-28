@@ -9,25 +9,42 @@ const generateLearning = async (jobId) => {
     });
 
     if (!analytics.length) {
-        return null;
+        throw new Error(
+            "No analytics available for learning"
+        );
     }
 
     const latest = analytics[0];
 
-    let insight = "Performance data collected.";
-    let recommendation =
-        "Continue monitoring performance.";
+    let insight;
+    let recommendation;
 
-    if (latest.views > 10000) {
+    if (latest.views >= 10000) {
         insight =
             "Content achieved strong view volume.";
+
         recommendation =
-            "Consider producing more content around this topic.";
+            "Consider creating more content around this topic.";
     } else if (latest.views < 1000) {
         insight =
             "Content received relatively low view volume.";
+
         recommendation =
             "Review topic selection, title, thumbnail and opening hook.";
+    } else {
+        insight =
+            "Content achieved moderate view volume.";
+
+        recommendation =
+            "Continue monitoring this topic and test different hooks and thumbnails.";
+    }
+
+    if (latest.retention >= 60) {
+        insight +=
+            " Audience retention is relatively strong.";
+    } else if (latest.retention > 0) {
+        insight +=
+            " Audience retention may need improvement.";
     }
 
     return await Learning.create({
@@ -39,13 +56,16 @@ const generateLearning = async (jobId) => {
         metadata: {
             views: latest.views,
             likes: latest.likes,
+            comments: latest.comments,
+            shares: latest.shares,
+            watchTime: latest.watchTime,
             retention: latest.retention,
             ctr: latest.ctr,
         },
     });
 };
 
-const getLearning = async (jobId) => {
+const getJobLearning = async (jobId) => {
     return await Learning.find({
         job: jobId,
     }).sort({
@@ -55,5 +75,5 @@ const getLearning = async (jobId) => {
 
 module.exports = {
     generateLearning,
-    getLearning,
+    getJobLearning,
 };

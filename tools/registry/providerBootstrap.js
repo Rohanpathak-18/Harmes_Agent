@@ -9,6 +9,8 @@ registerProvider({
     capability: "web.search",
     provider: {
         id: "tavily",
+        priority: 1,
+        enabled: true,
         execute: tavilyProvider.search,
     },
 });
@@ -17,6 +19,8 @@ registerProvider({
     capability: "llm.generate",
     provider: {
         id: "huggingface",
+        priority: 1,
+        enabled: true,
         execute: huggingfaceProvider.generateText,
     },
 });

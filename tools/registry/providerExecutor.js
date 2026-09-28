@@ -1,17 +1,13 @@
-const {
-    getProviders,
-} = require("./toolRegistry");
+const { getProviders } = require("./toolRegistry");
 
-const executeWithFallback = async (
-    capability,
-    input,
-    context = {}
-) => {
-    const providers = getProviders(capability);
+const executeWithFallback = async (capability, input, context = {}) => {
+    const providers = getProviders(capability)
+        .filter((provider) => provider.enabled !== false)
+        .sort((a, b) => (a.priority || 999) - (b.priority || 999));
 
     if (!providers.length) {
         throw new Error(
-            `No providers available for capability: ${capability}`
+            `No enabled providers available for capability: ${capability}`
         );
     }
 
@@ -20,13 +16,12 @@ const executeWithFallback = async (
     for (const provider of providers) {
         try {
             console.log(
-                `Trying provider: ${provider.id}`
+                `Trying provider: ${provider.id} for ${capability}`
             );
 
-            const result = await provider.execute(
-                input,
-                context
-            );
+            const result = await provider.execute(input, context);
+
+            console.log(`Provider ${provider.id} succeeded`);
 
             return {
                 ...result,
@@ -43,9 +38,8 @@ const executeWithFallback = async (
     }
 
     throw new Error(
-        `All providers failed for capability: ${capability}. Last error: ${
-            lastError?.message || "Unknown error"
-        }`
+        `All providers failed for capability: ${capability}. ` +
+        `Last error: ${lastError?.message || "Unknown error"}`
     );
 };
 

@@ -14,6 +14,7 @@ const workflowRoutes = require("./routes/workflow.routes");
 const approvalRoutes = require("./routes/approval.routes");
 const publicationRoutes = require("./routes/publication.routes");
 const { errorHandler } = require("./middleware/error.middleware");
+const analyticsRoutes = require("./routes/analytics.routes");
 
 dotenv.config();
 
@@ -38,6 +39,7 @@ app.use("/api/jobs", jobRoutes);
 app.use("/api/workflow", workflowRoutes);
 app.use("/api/approval", approvalRoutes);
 app.use("/api/publications", publicationRoutes);
+app.use("/api/analytics", analyticsRoutes);
 app.use(errorHandler);
 
 app.get("/", (req, res) => {

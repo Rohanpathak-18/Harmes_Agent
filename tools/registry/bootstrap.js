@@ -12,6 +12,8 @@ registerTool(llmAdapter);
 registerTool(mediaAdapter);
 registerTool(youtubeAdapter);
 
+require("./providerBootstrap");
+
 module.exports = {
   webSearchAdapter,
   llmAdapter,

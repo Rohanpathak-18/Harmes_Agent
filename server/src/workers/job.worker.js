@@ -1,5 +1,8 @@
 require("dotenv").config();
 
+
+require("../bootstrap");
+
 const { Worker } = require("bullmq");
 const connectDB = require("../config/database");
 const { runJobWorkflow } = require("../../../workflows/orchestrator/orchestrator");

@@ -17,6 +17,8 @@ const { errorHandler } = require("./middleware/error.middleware");
 const analyticsRoutes = require("./routes/analytics.routes");
 const learningRoutes = require("./routes/learning.routes");
 const retryRoutes = require("./routes/retry.routes");
+const healthRoutes = require("./routes/health.routes");
+const systemRoutes = require("./routes/system.routes");
 
 dotenv.config();
 
@@ -44,6 +46,9 @@ app.use("/api/publications", publicationRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/learning", learningRoutes);
 app.use("/api/retry", retryRoutes);
+app.use("/api/health", healthRoutes);
+app.use("/api/system", systemRoutes);
+
 app.use(errorHandler);
 
 app.get("/", (req, res) => {

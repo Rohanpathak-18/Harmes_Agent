@@ -1,5 +1,5 @@
 const Job = require("../models/Job");
-const { runJobWorkflow } = require("../../../workflows/orchestrator/orchestrator");
+const { enqueueJob } = require("./jobQueue.service");
 
 const retryJob = async (jobId) => {
     const job = await Job.findById(jobId);
@@ -19,10 +19,12 @@ const retryJob = async (jobId) => {
 
     await job.save();
 
-    // Resume the workflow
-    const result = await runJobWorkflow(job._id);
+    const queueJob = await enqueueJob(job._id);
 
-    return result;
+    return {
+        job,
+        queueJobId: queueJob.id,
+    };
 };
 
 module.exports = {

@@ -4,7 +4,9 @@ const { hashToken } = require("../utils/token");
 
 const requireAuth = async (req, res, next) => {
     try {
-        const sessionToken = req.cookies.hermes_session;
+        const authorization = req.get("authorization") || "";
+        const bearerToken = authorization.match(/^Bearer\s+(.+)$/i)?.[1];
+        const sessionToken = req.cookies.hermes_session || bearerToken;
 
         if (!sessionToken) {
             return res.status(401).json({
@@ -50,7 +52,9 @@ const requireAuth = async (req, res, next) => {
 // or expired session means "signed out" there, not an API error.
 const optionalAuth = async (req, res, next) => {
     try {
-        const sessionToken = req.cookies?.hermes_session;
+        const authorization = req.get("authorization") || "";
+        const bearerToken = authorization.match(/^Bearer\s+(.+)$/i)?.[1];
+        const sessionToken = req.cookies?.hermes_session || bearerToken;
         if (!sessionToken) {
             req.user = null;
             return next();

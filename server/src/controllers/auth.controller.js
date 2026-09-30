@@ -279,6 +279,7 @@ const createSession = async (req, res, user) => {
     success: true,
     message: "Login successful",
     data: {
+      sessionToken,
       user: {
         id: user._id,
         name: user.name,
@@ -387,7 +388,8 @@ const verifyEmail = async (req, res) => {
 
 const logout = async (req, res) => {
   try {
-    const sessionToken = req.cookies.hermes_session;
+    const sessionToken = req.cookies.hermes_session ||
+      (req.get("authorization") || "").match(/^Bearer\s+(.+)$/i)?.[1];
 
     if (sessionToken) {
       const tokenHash = hashToken(sessionToken);
@@ -405,8 +407,8 @@ const logout = async (req, res) => {
 
     res.clearCookie("hermes_session", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: true,
+      sameSite: "none",
     });
 
     return res.status(200).json({

@@ -37,9 +37,11 @@ export default function Register() {
       toast.success("Your verification code is on its way.");
       navigate(`/verify-email?email=${encodeURIComponent(email)}`, { replace: true });
     } catch (error) {
-      const message = error.code === "ECONNABORTED"
-        ? "The server took too long to respond. Check the server and try again."
-        : error.response?.data?.message || "We couldn't create your workspace. Please try again.";
+      const message = error.response?.status === 404
+        ? "The website could not find the API. Set VITE_API_URL to the backend address ending in /api, then redeploy the frontend."
+        : error.code === "ECONNABORTED"
+          ? "The server took too long to respond. Check the server and try again."
+          : error.response?.data?.message || "We couldn't create your workspace. Please try again.";
       setFormError(message);
       toast.error(message);
     } finally {

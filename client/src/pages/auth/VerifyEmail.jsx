@@ -4,6 +4,7 @@ import { ArrowLeft, Check, Mail, ShieldCheck } from "lucide-react";
 import toast from "react-hot-toast";
 
 import { resendVerification, verifyEmail } from "../../api/auth";
+import { saveSessionToken } from "../../api/client";
 import useAuthStore from "../../store/authStore";
 
 const VerifyEmail = () => {
@@ -35,6 +36,7 @@ const VerifyEmail = () => {
     try {
       setLoading(true);
       const response = await verifyEmail({ email, otp });
+      saveSessionToken(response?.data?.sessionToken || response?.sessionToken);
       const user = response?.user || response?.data?.user;
       if (user) setUser(user);
       toast.success("Email verified. Welcome to Hermes.");

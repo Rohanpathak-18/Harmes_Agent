@@ -5,6 +5,7 @@ import {
   login as loginRequest,
   logout as logoutRequest,
 } from "../api/auth";
+import { saveSessionToken } from "../api/client";
 
 const useAuthStore = create((set) => ({
   user: null,
@@ -39,6 +40,8 @@ const useAuthStore = create((set) => ({
     const response =
       await loginRequest(credentials);
 
+    saveSessionToken(response?.data?.sessionToken || response?.sessionToken);
+
     const user = response?.user || response?.data?.user;
     if (user) set({ user });
 
@@ -49,6 +52,7 @@ const useAuthStore = create((set) => ({
     try {
       await logoutRequest();
     } finally {
+      window.localStorage.removeItem("hermes_session_token");
       set({
         user: null,
       });

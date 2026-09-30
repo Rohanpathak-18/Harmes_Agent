@@ -16,6 +16,14 @@ const Publication =
 const Approval =
     require("../../server/src/models/Approval");
 
+const {
+    saveAnalytics,
+} = require("../../server/src/services/analytics.service");
+
+const {
+    generateLearning,
+} = require("../../server/src/services/Learning.service");
+
 class PublisherAgent extends Agent {
     constructor() {
         super({
@@ -35,14 +43,10 @@ class PublisherAgent extends Agent {
         }
 
         const job =
-            await Job.findById(
-                context.jobId
-            );
+            await Job.findById(context.jobId);
 
         if (!job) {
-            throw new Error(
-                "Job not found"
-            );
+            throw new Error("Job not found");
         }
 
         // HARD APPROVAL GATE
@@ -71,11 +75,10 @@ class PublisherAgent extends Agent {
             });
 
         if (!video) {
-            throw new Error(
-                "Video not found"
-            );
+            throw new Error("Video not found");
         }
 
+        // Publish through Tool Bus
         const result =
             await executeTool(
                 "youtube-publish",
@@ -89,6 +92,7 @@ class PublisherAgent extends Agent {
                 }
             );
 
+        // Save publication
         const publication =
             await Publication.findOneAndUpdate(
                 {
@@ -111,7 +115,38 @@ class PublisherAgent extends Agent {
                 }
             );
 
-        job.status = "PUBLISHED";
+        // Move to ANALYZING
+        job.status = "ANALYZING";
+        await job.save();
+
+        // Initial analytics snapshot.
+        // Current YouTube provider is MOCK, so these are
+        // intentionally zero/placeholder metrics.
+        await saveAnalytics({
+            jobId: job._id,
+            platform: "youtube",
+            externalId: result.externalId,
+            metrics: {
+                views: 0,
+                likes: 0,
+                comments: 0,
+                shares: 0,
+                watchTime: 0,
+                retention: 0,
+                ctr: 0,
+            },
+            metadata: {
+                source: "mock-youtube-provider",
+                type: "initial-publication-snapshot",
+            },
+        });
+
+        // Generate learning from the available analytics.
+        const learning =
+            await generateLearning(job._id);
+
+        // Learning completed
+        job.status = "LEARNED";
         job.completedAt = new Date();
 
         await job.save();
@@ -124,7 +159,9 @@ class PublisherAgent extends Agent {
                 publication._id,
             externalId:
                 result.externalId,
-            status: "PUBLISHED",
+            learningId:
+                learning._id,
+            status: "LEARNED",
         };
     }
 }

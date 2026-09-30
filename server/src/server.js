@@ -1,5 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv");
+const path = require("path");
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
 const cors = require("cors");
 const helmet = require("helmet");
 const cookieParser = require("cookie-parser");
@@ -19,8 +21,6 @@ const learningRoutes = require("./routes/learning.routes");
 const retryRoutes = require("./routes/retry.routes");
 const healthRoutes = require("./routes/health.routes");
 const systemRoutes = require("./routes/system.routes");
-
-dotenv.config();
 
 const app = express();
 
@@ -44,6 +44,9 @@ app.use("/api/workflow", workflowRoutes);
 app.use("/api/approval", approvalRoutes);
 app.use("/api/publications", publicationRoutes);
 app.use("/api/analytics", analyticsRoutes);
+// Keep the browser-facing name neutral so privacy extensions do not mistake
+// the first-party feature route for a third-party analytics tracker.
+app.use("/api/job-insights", analyticsRoutes);
 app.use("/api/learning", learningRoutes);
 app.use("/api/retry", retryRoutes);
 app.use("/api/health", healthRoutes);

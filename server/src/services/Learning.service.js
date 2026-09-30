@@ -4,9 +4,7 @@ const Analytics = require("../models/Analytics");
 const generateLearning = async (jobId) => {
     const analytics = await Analytics.find({
         job: jobId,
-    }).sort({
-        collectedAt: -1,
-    });
+    }).sort({ collectedAt: -1 });
 
     if (!analytics.length) {
         throw new Error(
@@ -20,21 +18,15 @@ const generateLearning = async (jobId) => {
     let recommendation;
 
     if (latest.views >= 10000) {
-        insight =
-            "Content achieved strong view volume.";
-
+        insight = "Content achieved strong view volume.";
         recommendation =
             "Consider creating more content around this topic.";
     } else if (latest.views < 1000) {
-        insight =
-            "Content received relatively low view volume.";
-
+        insight = "Content received relatively low view volume.";
         recommendation =
             "Review topic selection, title, thumbnail and opening hook.";
     } else {
-        insight =
-            "Content achieved moderate view volume.";
-
+        insight = "Content achieved moderate view volume.";
         recommendation =
             "Continue monitoring this topic and test different hooks and thumbnails.";
     }
@@ -47,7 +39,7 @@ const generateLearning = async (jobId) => {
             " Audience retention may need improvement.";
     }
 
-    return await Learning.create({
+    const learning = await Learning.create({
         job: jobId,
         type: "performance",
         insight,
@@ -63,14 +55,14 @@ const generateLearning = async (jobId) => {
             ctr: latest.ctr,
         },
     });
+
+    return learning;
 };
 
 const getJobLearning = async (jobId) => {
     return await Learning.find({
         job: jobId,
-    }).sort({
-        createdAt: -1,
-    });
+    }).sort({ createdAt: -1 });
 };
 
 module.exports = {

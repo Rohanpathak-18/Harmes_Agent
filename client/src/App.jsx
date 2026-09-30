@@ -1,122 +1,274 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import React, { useEffect } from "react";
+import {
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 
-function App() {
-  const [count, setCount] = useState(0)
+import useAuthStore from "./store/authStore";
+
+import Loading from "./components/ui/Loading";
+import AppLayout from "./components/layout/AppLayout";
+
+import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
+import VerifyEmail from "./pages/auth/VerifyEmail";
+
+import Dashboard from "./pages/Dashboard";
+import Jobs from "./pages/Jobs";
+import CreateJob from "./pages/CreateJob";
+import JobDetails from "./pages/JobDetails";
+
+import Research from "./pages/research/Research";
+import ContentPlan from "./pages/content/ContentPlan";
+import Script from "./pages/content/Script";
+import Production from "./pages/production/Production";
+import ApprovalCenter from "./pages/approval/ApprovalCenter";
+import PublishingQueue from "./pages/publishing/PublishingQueue";
+import Analytics from "./pages/insights/Performance";
+import Learning from "./pages/learning/Learning";
+import Settings from "./pages/settings/Settings";
+
+import "./App.css";
+
+const ProtectedRoute = ({
+  children,
+}) => {
+  const user = useAuthStore(
+    (state) => state.user
+  );
+
+  const loading = useAuthStore(
+    (state) => state.loading
+  );
+
+  if (loading) {
+    return (
+      <Loading
+        text="Loading Hermes..."
+        fullPage
+      />
+    );
+  }
+
+  if (!user) {
+    return (
+      <Navigate
+        to="/login"
+        replace
+      />
+    );
+  }
+
+  return children;
+};
+
+const PublicRoute = ({
+  children,
+}) => {
+  const user = useAuthStore(
+    (state) => state.user
+  );
+
+  const loading = useAuthStore(
+    (state) => state.loading
+  );
+
+  if (loading) {
+    return (
+      <Loading
+        text="Loading..."
+        fullPage
+      />
+    );
+  }
+
+  if (user) {
+    return (
+      <Navigate
+        to="/"
+        replace
+      />
+    );
+  }
+
+  return children;
+};
+
+const App = () => {
+  const initialize =
+    useAuthStore(
+      (state) => state.initialize
+    );
+
+  const clearUser =
+    useAuthStore(
+      (state) => state.clearUser
+    );
+
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
+
+  useEffect(() => {
+    const handleUnauthorized =
+      () => {
+        clearUser();
+      };
+
+    window.addEventListener(
+      "hermes:unauthorized",
+      handleUnauthorized
+    );
+
+    return () => {
+      window.removeEventListener(
+        "hermes:unauthorized",
+        handleUnauthorized
+      );
+    };
+  }, [clearUser]);
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <Routes>
+      {/* PUBLIC ROUTES */}
 
-      <div className="ticks"></div>
+      <Route
+        path="/login"
+        element={
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        }
+      />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      <Route
+        path="/register"
+        element={
+          <PublicRoute>
+            <Register />
+          </PublicRoute>
+        }
+      />
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
-}
+      <Route
+        path="/forgot-password"
+        element={
+          <PublicRoute>
+            <ForgotPassword />
+          </PublicRoute>
+        }
+      />
 
-export default App
+      <Route
+        path="/reset-password"
+        element={
+          <PublicRoute>
+            <ResetPassword />
+          </PublicRoute>
+        }
+      />
+
+      <Route
+        path="/verify-email"
+        element={
+          <PublicRoute>
+            <VerifyEmail />
+          </PublicRoute>
+        }
+      />
+
+
+      {/* PROTECTED APPLICATION */}
+
+      <Route
+        element={
+          <ProtectedRoute>
+            <AppLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route
+          path="/"
+          element={<Dashboard />}
+        />
+
+        <Route
+          path="/jobs"
+          element={<Jobs />}
+        />
+
+        <Route
+          path="/jobs/new"
+          element={<CreateJob />}
+        />
+
+        <Route
+          path="/jobs/:jobId"
+          element={<JobDetails />}
+        />
+
+        <Route
+          path="/research"
+          element={<Research />}
+        />
+
+        <Route
+          path="/content"
+          element={<ContentPlan />}
+        />
+
+        <Route
+          path="/content/script"
+          element={<Script />}
+        />
+
+        <Route
+          path="/production"
+          element={<Production />}
+        />
+
+        <Route
+          path="/approval"
+          element={<ApprovalCenter />}
+        />
+
+        <Route
+          path="/publishing"
+          element={<PublishingQueue />}
+        />
+
+        <Route
+          path="/analytics"
+          element={<Analytics />}
+        />
+
+        <Route
+          path="/learning"
+          element={<Learning />}
+        />
+
+        <Route
+          path="/settings"
+          element={<Settings />}
+        />
+      </Route>
+
+      {/* FALLBACK */}
+
+      <Route
+        path="*"
+        element={
+          <Navigate
+            to="/"
+            replace
+          />
+        }
+      />
+    </Routes>
+  );
+};
+
+export default App;

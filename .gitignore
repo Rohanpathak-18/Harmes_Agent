@@ -1,12 +1,19 @@
+# Dependencies
 node_modules/
+
+# Environment
 .env
+.env.*
+
+# Archives
+*.zip
+
+# Temporary test files
+server/test-email.js
+server/test-email.jsx
+
+# Logs
 *.log
 
-server/.env
-client/.env
-
-server/uploads/
-server/logs/
-
+# Build
 dist/
-build/

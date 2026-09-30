@@ -2,31 +2,76 @@ const express = require("express");
 
 const {
     register,
-    login, 
+    login,
     verifyEmail,
-    logout, 
-    getMe, 
-    forgotPassword, 
+    resendVerificationOTP,
+    logout,
+    getMe,
+    forgotPassword,
     verifyResetOTP,
     resetPassword,
 } = require("../controllers/auth.controller");
 
-const { requireAuth } = require("../middleware/auth.middleware");
-
 const {
-    authRateLimiter,
-    otpRateLimiter,
-} = require("../middleware/rateLimit.middleware");
+    requireAuth,
+    optionalAuth,
+} = require("../middleware/auth.middleware");
+const { authRateLimiter, otpRateLimiter } = require("../middleware/rateLimit.middleware");
 
 const router = express.Router();
 
-router.post("/register", authRateLimiter, register);
-router.post("/login", authRateLimiter, login);
-router.post("/verify-email", otpRateLimiter, verifyEmail);
-router.post("/logout", logout);
-router.post("/forgot-password", otpRateLimiter, forgotPassword);
-router.post("/verify-reset-otp", otpRateLimiter, verifyResetOTP);
-router.post("/reset-password", authRateLimiter, resetPassword);
-router.get("/me", requireAuth, getMe);
+router.post(
+    "/register",
+    authRateLimiter,
+    register
+);
+
+router.post(
+    "/login",
+    authRateLimiter,
+    login
+);
+
+router.post(
+    "/verify-email",
+    otpRateLimiter,
+    verifyEmail
+);
+
+router.post(
+    "/resend-verification",
+    otpRateLimiter,
+    resendVerificationOTP
+);
+
+router.post(
+    "/forgot-password",
+    otpRateLimiter,
+    forgotPassword
+);
+
+router.post(
+    "/verify-reset-otp",
+    otpRateLimiter,
+    verifyResetOTP
+);
+
+router.post(
+    "/reset-password",
+    otpRateLimiter,
+    resetPassword
+);
+
+router.post(
+    "/logout",
+    requireAuth,
+    logout
+);
+
+router.get(
+    "/me",
+    optionalAuth,
+    getMe
+);
 
 module.exports = router;

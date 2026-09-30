@@ -46,6 +46,37 @@ const requireAuth = async (req, res, next) => {
     }
 };
 
+// Session discovery is used during app startup on public pages too. A missing
+// or expired session means "signed out" there, not an API error.
+const optionalAuth = async (req, res, next) => {
+    try {
+        const sessionToken = req.cookies?.hermes_session;
+        if (!sessionToken) {
+            req.user = null;
+            return next();
+        }
+
+        const session = await Session.findOne({
+            tokenHash: hashToken(sessionToken),
+            revokedAt: null,
+            expiresAt: { $gt: new Date() },
+        });
+
+        if (!session) {
+            req.user = null;
+            return next();
+        }
+
+        const user = await User.findById(session.user);
+        req.user = user?.status === "active" ? user : null;
+        req.session = req.user ? session : null;
+        return next();
+    } catch (error) {
+        return next(error);
+    }
+};
+
 module.exports = {
     requireAuth,
+    optionalAuth,
 };

@@ -5,6 +5,9 @@ const api = axios.create({
   // on the page's own origin, which works from localhost and forwarded URLs.
   // Set VITE_API_URL only when the deployed API has a separate origin.
   baseURL: import.meta.env.VITE_API_URL || "/api",
+  // Resolve failed or unreachable API calls instead of leaving auth screens
+  // in a permanent loading state.
+  timeout: 12000,
 
   withCredentials: true,
 

@@ -58,7 +58,11 @@ const Login = () => {
         return;
       }
 
-      toast.error(data?.message || "Unable to sign in.");
+      toast.error(
+        error.code === "ECONNABORTED"
+          ? "The server took too long to respond. Check the server and try again."
+          : data?.message || "Unable to sign in.",
+      );
     } finally {
       setLoading(false);
     }

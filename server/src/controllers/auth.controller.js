@@ -16,13 +16,19 @@ const { generateSessionToken, hashToken } = require("../utils/token");
 const { generateOTP, hashOTP } = require("../utils/otp");
 
 const getVerificationDeliveryMessage = (error) => {
+  if (error.code === "SMTP_CONFIG_MISSING") {
+    return "Your account is saved, but the server is missing SMTP_HOST, SMTP_USER or SMTP_PASSWORD. Add these variables to the deployed server environment and retry registration.";
+  }
   if (error.code === "GMAIL_APP_PASSWORD_REQUIRED") {
-    return "Your account is saved, but Gmail needs a 16-character Google App Password in server/.env. Create it for the same Gmail account as SMTP_USER, restart the server, then retry registration.";
+    return "Your account is saved, but Gmail needs a 16-character Google App Password. Set SMTP_PASSWORD to an App Password for SMTP_USER in the deployed server environment, restart the server, then retry registration.";
   }
   if (error.code === "EAUTH") {
-    return "Your account is saved, but Google rejected the SMTP sign-in. Confirm SMTP_USER is the Gmail account that generated SMTP_PASSWORD, create a fresh App Password if needed, restart the server, then retry registration.";
+    return "Your account is saved, but Google rejected SMTP sign-in. Confirm SMTP_USER and SMTP_PASSWORD belong together, update them in the deployed server environment, restart the server, then retry registration.";
   }
-  return "Your account is saved, but the verification email could not be sent. Check SMTP settings in server/.env and retry registration.";
+  if (["ETIMEDOUT", "ESOCKET", "ECONNECTION", "ECONNECTIONTIMEDOUT"].includes(error.code)) {
+    return "Your account is saved, but the server could not connect to the email provider. Check SMTP_HOST, SMTP_PORT and SMTP_SECURE in the deployed server environment, then retry registration.";
+  }
+  return "Your account is saved, but the verification email could not be sent. Check the server's SMTP settings and retry registration.";
 };
 
 const register = async (req, res) => {

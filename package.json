@@ -1,7 +1,7 @@
 {
   "name": "harmes",
   "version": "1.0.0",
-  "description": "",
+  "description": "working on it...",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -23,5 +23,8 @@
     "@lancedb/lancedb": "^0.39.0",
     "axios": "^1.20.0",
     "dotenv": "^18.0.4"
+  },
+  "directories": {
+    "doc": "docs"
   }
 }

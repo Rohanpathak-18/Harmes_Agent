@@ -57,13 +57,11 @@ const register = async (req, res) => {
         existingUser.isEmailVerified ||
         !(await bcrypt.compare(password, existingUser.password))
       ) {
-        return res
-          .status(409)
-          .json({
-            success: false,
-            message:
-              "An account with this email already exists. Sign in or use password recovery.",
-          });
+        return res.status(409).json({
+          success: false,
+          message:
+            "An account with this email already exists. Sign in or use password recovery.",
+        });
       }
 
       let membership = await Membership.findOne({
@@ -93,21 +91,17 @@ const register = async (req, res) => {
         await createAndSendVerificationOTP(existingUser);
       } catch (error) {
         console.error("Registration verification email error:", error);
-        return res
-          .status(503)
-          .json({
-            success: false,
-            code: error.code || "EMAIL_DELIVERY_FAILED",
-            message: getVerificationDeliveryMessage(error),
-          });
-      }
-      return res
-        .status(200)
-        .json({
-          success: true,
-          message: "A new verification code was sent.",
-          data: { email: existingUser.email, requiresEmailVerification: true },
+        return res.status(503).json({
+          success: false,
+          code: error.code || "EMAIL_DELIVERY_FAILED",
+          message: getVerificationDeliveryMessage(error),
         });
+      }
+      return res.status(200).json({
+        success: true,
+        message: "A new verification code was sent.",
+        data: { email: existingUser.email, requiresEmailVerification: true },
+      });
     }
 
     // 4. Hash password
@@ -149,13 +143,11 @@ const register = async (req, res) => {
       await createAndSendVerificationOTP(user);
     } catch (error) {
       console.error("Registration verification email error:", error);
-      return res
-        .status(503)
-        .json({
-          success: false,
-          code: error.code || "EMAIL_DELIVERY_FAILED",
-          message: getVerificationDeliveryMessage(error),
-        });
+      return res.status(503).json({
+        success: false,
+        code: error.code || "EMAIL_DELIVERY_FAILED",
+        message: getVerificationDeliveryMessage(error),
+      });
     }
 
     return res.status(201).json({
@@ -276,11 +268,12 @@ const createSession = async (req, res, user) => {
 
   // HTTP-only cookie
   res.cookie("hermes_session", sessionToken, {
-  httpOnly: true,
-  secure: true,
-  sameSite: "none",
-  maxAge: 7 * 24 * 60 * 60 * 1000,
-});
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    path: "/",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
 
   return res.status(200).json({
     success: true,
@@ -603,20 +596,16 @@ const resetPassword = async (req, res) => {
       consumed: false,
     }).sort({ createdAt: -1 });
     if (!otpRecord || otpRecord.expiresAt <= new Date()) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "The reset code is invalid or expired. Request a new code.",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "The reset code is invalid or expired. Request a new code.",
+      });
     }
     if (otpRecord.attempts >= 5) {
-      return res
-        .status(429)
-        .json({
-          success: false,
-          message: "Too many attempts. Request a new reset code.",
-        });
+      return res.status(429).json({
+        success: false,
+        message: "Too many attempts. Request a new reset code.",
+      });
     }
     if (hashOTP(String(otp).trim()) !== otpRecord.codeHash) {
       otpRecord.attempts += 1;

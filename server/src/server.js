@@ -23,6 +23,7 @@ const healthRoutes = require("./routes/health.routes");
 const systemRoutes = require("./routes/system.routes");
 
 const app = express();
+app.set("trust proxy", 1);
 
 connectDB();
 

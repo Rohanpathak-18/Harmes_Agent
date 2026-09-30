@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Hermes Website User Guide</title>
+<style>
+@page { size: A4; margin: 0; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; font-family: "Segoe UI", Arial, sans-serif; color: #17231f; background: #e9eeeb; }
+.page { width: 210mm; height: 297mm; padding: 17mm 18mm 16mm; margin: 0 auto; background: #fbfcfa; position: relative; overflow: hidden; page-break-after: always; break-after: page; }
+.page:last-child { page-break-after: auto; break-after: auto; }
+.cover { background: #10241f; color: #f5f7f4; padding: 25mm 23mm; }
+.brand { display: flex; align-items: center; gap: 10px; font-size: 12px; letter-spacing: .2em; font-weight: 700; }
+.mark { width: 34px; height: 34px; border-radius: 11px; display: inline-grid; place-items: center; background: #d6f36a; color: #10241f; font-size: 19px; letter-spacing: 0; }
+.cover .eyebrow { margin-top: 63mm; color: #d6f36a; }
+.cover h1 { font-size: 44px; line-height: 1.08; letter-spacing: -.04em; max-width: 145mm; margin: 12px 0 16px; }
+.cover .lead { font-size: 17px; line-height: 1.55; color: #c6d3cd; max-width: 134mm; }
+.cover .cover-rule { height: 1px; background: #456059; margin: 27mm 0 8mm; }
+.cover .meta { color: #b8c7c0; font-size: 11px; line-height: 1.8; }
+.cover .cover-accent { position: absolute; right: -23mm; bottom: 25mm; width: 100mm; height: 100mm; border: 1px solid #35544a; border-radius: 50%; }
+.cover .cover-accent:before, .cover .cover-accent:after { content: ""; position: absolute; border: 1px solid #35544a; border-radius: 50%; inset: 15mm; }
+.cover .cover-accent:after { inset: 30mm; border-color: #d6f36a; }
+.eyebrow { color: #648044; text-transform: uppercase; font-size: 9px; font-weight: 800; letter-spacing: .16em; }
+h1 { font-size: 30px; letter-spacing: -.035em; line-height: 1.12; margin: 8px 0 9px; }
+h2 { font-size: 15px; margin: 0 0 7px; letter-spacing: -.015em; }
+h3 { font-size: 11px; margin: 0 0 5px; }
+p { margin: 0 0 9px; font-size: 10.2px; line-height: 1.52; color: #51605a; }
+.intro { max-width: 165mm; font-size: 11.5px; margin-bottom: 17px; }
+.section { margin-top: 13px; }
+.step { display: grid; grid-template-columns: 29px 1fr; gap: 10px; margin: 9px 0; }
+.num { width: 25px; height: 25px; border-radius: 50%; display: grid; place-items: center; color: #263720; background: #eaf3d4; font-size: 10px; font-weight: 800; }
+.step p { margin: 0; }
+.card { background: #f0f4f1; border: 1px solid #e1e9e4; border-radius: 9px; padding: 12px 13px; margin: 8px 0; }
+.card p:last-child { margin-bottom: 0; }
+.tip { border-left: 3px solid #91ad45; padding: 8px 11px; background: #f4f7ea; border-radius: 0 7px 7px 0; margin: 10px 0; }
+.tip strong { display:block; font-size: 9.5px; margin-bottom: 3px; }
+.tip p { margin: 0; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.pill { display: inline-block; font-size: 8.5px; line-height: 1; padding: 6px 8px; background: #eaf0eb; border-radius: 20px; color: #384d40; font-weight: 700; margin: 2px 3px 2px 0; }
+.sequence { display: flex; flex-wrap: wrap; gap: 5px; margin: 10px 0; }
+.sequence span { background: #edf2ee; color: #354b40; border-radius: 5px; padding: 6px 8px; font-size: 8.3px; font-weight: 700; }
+.sequence b { color: #8da747; padding-left: 5px; }
+ul { margin: 5px 0 8px; padding-left: 16px; }
+li { font-size: 9.8px; line-height: 1.5; color: #51605a; margin: 3px 0; }
+.small { font-size: 8.7px; color: #718078; }
+.commands { background: #122820; color: #e7f2e9; border-radius: 8px; padding: 9px 12px; font: 8.5px/1.55 Consolas, "Courier New", monospace; margin: 7px 0; white-space: pre-wrap; }
+.page-footer { position: absolute; left: 18mm; right: 18mm; bottom: 8mm; border-top: 1px solid #e2e9e5; padding-top: 5px; display: flex; justify-content: space-between; color: #819088; font-size: 8px; }
+.cover .page-footer { left: 23mm; right: 23mm; border-color: #35544a; color: #9cafa5; }
+.end { background: #10241f; color: #f5f7f4; }
+.end p { color: #c5d0ca; }
+.end h1, .end h2 { color: #f5f7f4; }
+.end .eyebrow { color: #d6f36a; }
+.end .card { background: #1a332c; border-color: #345348; }
+.end .card p, .end li { color: #c5d0ca; }
+.end .page-footer { border-color: #35544a; color: #9cafa5; }
+.highlight { color: #d6f36a; }
+@media print { html, body { background: white; } .page { margin: 0; box-shadow: none; } }
+</style>
+</head>
+<body>
+<section class="page cover">
+  <div class="brand"><span class="mark">H</span> HERMES <span style="font-weight:400;color:#9eb2a8;letter-spacing:.08em">CONTENT OS</span></div>
+  <div class="eyebrow">WEBSITE USER GUIDE</div>
+  <h1>From a content idea<br>to a managed workflow.</h1>
+  <p class="lead">A practical, step-by-step guide to using Hermes: set up your workspace, create and track jobs, review content, and learn from performance.</p>
+  <div class="cover-rule"></div>
+  <div class="meta">Prepared from the current Hermes website and project<br>Edition 1.0 - September 2026</div>
+  <div class="cover-accent"></div>
+  <div class="page-footer"><span>HERMES - WEBSITE USER GUIDE</span><span>01</span></div>
+</section>
+
+<section class="page">
+  <div class="eyebrow">01 - GETTING STARTED</div><h1>Open your workspace</h1>
+  <p class="intro">Hermes is a workspace for coordinating content jobs. A job holds the objective and progress for one piece of work. Your account keeps the workspace private to your sign-in.</p>
+  <div class="section"><h2>Before using the website</h2>
+    <div class="two">
+      <div class="card"><h3>Services must be available</h3><p>The website needs its API server and database. Job processing also needs Redis and a running worker. If the app is run locally, keep those services running while using Hermes.</p></div>
+      <div class="card"><h3>Use the website address</h3><p>Open the local or deployed website address provided for your workspace. The code project's development website commonly runs at <b>http://localhost:5173</b>; the API server is separate.</p></div>
+    </div>
+  </div>
+  <div class="page-footer"><span>HERMES - WEBSITE USER GUIDE</span><span>02</span></div>
+</section>
+
+<section class="page">
+  <div class="eyebrow">LOCAL SETUP</div><h1>Start a local workspace</h1>
+  <p class="intro">If you use a hosted workspace, skip this page. To run the local project, start its supporting services and leave them running while you use the website.</p>
+  <div class="card"><h2>1 - Start Redis</h2><p>Open Docker Desktop and wait for its engine to be ready. In PowerShell, start the existing container:</p><div class="commands">docker start hermes-redis
+docker exec hermes-redis redis-cli ping</div><p>The second command should return <b>PONG</b>. If the container has never been created, run this once instead:</p><div class="commands">docker run --name hermes-redis -p 6379:6379 -d redis:7-alpine</div></div>
+  <div class="card"><h2>2 - Start the API and job worker</h2><p>In two separate PowerShell windows from the project folder:</p><div class="commands">cd server; npm run dev
+cd server; npm run worker</div><p>The server needs a working database connection configured for the project.</p></div>
+  <div class="card"><h2>3 - Start the website</h2><p>In another PowerShell window from the project folder:</p><div class="commands">cd client; npm run dev</div><p>Open the local address shown by Vite, commonly <b>http://localhost:5173</b>.</p></div>
+  <div class="tip"><strong>Publishing jobs</strong><p>When using local publishing, start the publisher worker in another server terminal with <b>cd server; npm run publish-worker</b>. Actual publishing also depends on the configured platform integration.</p></div>
+  <div class="page-footer"><span>HERMES - WEBSITE USER GUIDE</span><span>03</span></div>
+</section>
+
+<section class="page">
+  <div class="eyebrow">01 - GETTING STARTED</div><h1>Access your workspace</h1>
+  <div class="section"><h2>Create an account</h2>
+    <div class="step"><span class="num">1</span><p>On the sign-in screen, choose <b>Create one</b> to open registration.</p></div>
+    <div class="step"><span class="num">2</span><p>Enter your name, workspace name, work email, and a password of at least eight characters. Confirm the password and submit.</p></div>
+    <div class="step"><span class="num">3</span><p>Check your email for the six-digit verification code. Enter it on the verification page. The code expires after ten minutes; use <b>Resend code</b> if needed.</p></div>
+    <div class="step"><span class="num">4</span><p>After verification, Hermes opens the Dashboard. On later visits, sign in with your email and password.</p></div>
+  </div>
+  <div class="tip"><strong>Forgot your password?</strong><p>Choose <b>Forgot password?</b> on sign-in, request a reset code by email, then enter that code and a new password on the reset screen.</p></div>
+  <div class="section"><h2>Know the navigation</h2><p>The left menu is the main workspace map: Overview, Jobs, Create, Research, Content, Production, Approval, Publishing, Analytics, Learning, and Settings. On smaller screens, open the menu using the navigation control.</p></div>
+  <div class="page-footer"><span>HERMES - WEBSITE USER GUIDE</span><span>04</span></div>
+</section>
+
+<section class="page">
+  <div class="eyebrow">02 - YOUR FIRST JOB</div><h1>Create a clear objective</h1>
+  <p class="intro">A job tells Hermes what outcome you want. It is the starting point for the workflow and the place to return to check status.</p>
+  <div class="step"><span class="num">1</span><p>From the Dashboard, select <b>Create job</b>. You can also choose <b>Create</b> in the left menu or <b>New job</b> on the Jobs page.</p></div>
+  <div class="step"><span class="num">2</span><p>Write a specific objective in the text box. State the subject, intended audience, format, and desired outcome. The objective must be at least ten characters.</p></div>
+  <div class="card"><h3>Example of a useful objective</h3><p>"Research three current AI productivity trends for small businesses and develop a concise YouTube explainer for founders, including a clear practical takeaway."</p></div>
+  <div class="step"><span class="num">3</span><p>Select a priority: <b>Low</b> to process when capacity allows, <b>Normal</b> for standard work, or <b>High</b> to prioritize the job.</p></div>
+  <div class="step"><span class="num">4</span><p>Choose <b>Create job</b>. Hermes saves the job and opens its details page. If you change your mind before submitting, choose <b>Cancel</b>.</p></div>
+  <div class="section"><h2>What you'll see on the Dashboard</h2><p>The Dashboard summarizes total jobs, active jobs, jobs waiting for approval, and completed jobs. Recent Jobs gives quick access to individual work; Activity summarizes job status. Select a count or job to jump to its workspace.</p></div>
+  <div class="tip"><strong>Good objectives make better jobs</strong><p>Describe the result you need rather than how the software should do it. Avoid secrets or sensitive personal information in job descriptions.</p></div>
+  <div class="section"><h2>Find an existing job</h2><p>Open <b>Jobs</b>, search by words in the objective, and optionally filter by status. Use <b>Refresh</b> to fetch current job data. Select a job card to view its details and progress.</p></div>
+  <div class="page-footer"><span>HERMES - WEBSITE USER GUIDE</span><span>03</span></div>
+</section>
+
+<section class="page">
+  <div class="eyebrow">03 - RUN & TRACK</div><h1>Start and follow the workflow</h1>
+  <p class="intro">Creating a job saves it. To begin processing, open the job and explicitly choose <b>Run workflow</b>. A background worker then carries out the workflow stages.</p>
+  <div class="step"><span class="num">1</span><p>On the job details page, confirm the objective and priority.</p></div>
+  <div class="step"><span class="num">2</span><p>For a new job marked <b>Discovered</b>, choose <b>Run workflow</b>. Keep the API, Redis, and worker services available while it runs.</p></div>
+  <div class="step"><span class="num">3</span><p>Watch the status and workflow timeline. Choose <b>Refresh</b> if the page has not updated. You can return to the job later from Jobs or the Dashboard.</p></div>
+  <div class="sequence"><span>Discovered &gt;</span><span>Researching &gt;</span><span>Research ready &gt;</span><span>Scripting &gt;</span><span>Production &gt;</span><span>Final QA &gt;</span><span>Waiting approval</span></div>
+  <div class="section"><h2>What each status means</h2>
+   <p><span class="pill">Discovered</span>Created and ready to start. <span class="pill">Researching</span>Research is being prepared. <span class="pill">Research ready</span>Research stage completed. <span class="pill">Scripting</span>Planning and writing are in progress.</p>
+   <p><span class="pill">Production</span>Production assets are being prepared. <span class="pill">Final QA</span>Quality checks are running. <span class="pill">Waiting approval</span>Human review is required before publishing.</p>
+   <p><span class="pill">Approved</span>Review passed. <span class="pill">Scheduled</span>Added to the publishing queue. <span class="pill">Published</span>Publication is recorded. <span class="pill">Analyzing / Learned</span>Performance is being turned into insights. <span class="pill">Failed</span>A processing step needs attention.</p>
+  </div>
+  <div class="section"><h2>Use the stage pages</h2><p><b>Research, Content, Scripts, and Production</b> show which jobs have reached those stages and link to each job. They are progress views; the current website does not provide separate editing workspaces there. Open the job to see its objective, timeline, status, and any recorded error.</p></div>
+  <div class="tip"><strong>If a job fails</strong><p>Open its details page and read <b>Last error</b>. Confirm services and required integrations are available. If the underlying issue is resolved, choose <b>Retry job</b> to enqueue another attempt, then monitor the job again.</p></div>
+  <div class="page-footer"><span>HERMES - WEBSITE USER GUIDE</span><span>04</span></div>
+</section>
+
+<section class="page">
+  <div class="eyebrow">04 - REVIEW CONTENT</div><h1>Review before publishing</h1>
+  <p class="intro">Hermes runs quality checks before a job reaches approval. A person still makes the approval decision; a job is not meant to publish itself without that review.</p>
+  <div class="section"><h2>Open the Approval center</h2>
+    <div class="step"><span class="num">1</span><p>Choose <b>Approval</b> in the left menu. Jobs at or beyond final QA appear in the list.</p></div>
+    <div class="step"><span class="num">2</span><p>Read the objective and status. Choose <b>View</b> to open the full job details and timeline before deciding.</p></div>
+    <div class="step"><span class="num">3</span><p>If an approval request has not been created yet, choose <b>Request approval</b>. Jobs that reached approval through the workflow may already have a pending request.</p></div>
+    <div class="step"><span class="num">4</span><p>For a pending request, choose <b>Approve</b> to allow the job to continue, or <b>Reject</b> and enter a reason. Rejected jobs return to the final QA state for follow-up.</p></div>
+  </div>
+  <div class="two">
+    <div class="card"><h3>Approve when ready</h3><p>Approval changes the job to <b>Approved</b>. It becomes eligible to enter the publishing queue.</p></div>
+    <div class="card"><h3>Reject with a reason</h3><p>Give a short, actionable explanation so the issue is clear. Rejection does not publish the job.</p></div>
+  </div>
+  <div class="section"><h2>Important review boundary</h2><p>The current interface is focused on job status, objective, and timeline. It does not expose a full in-app script or media editor on the Research, Content, Scripts, or Production pages. Review the actual deliverable through the available job or asset records and your team's review process before approving.</p></div>
+  <div class="tip"><strong>Make approval deliberate</strong><p>Check accuracy, rights to use any material, brand fit, and the intended destination using your normal editorial standards. Use the job's recorded information as workflow context, not as a substitute for reviewing the finished deliverable.</p></div>
+  <div class="page-footer"><span>HERMES - WEBSITE USER GUIDE</span><span>05</span></div>
+</section>
+
+<section class="page">
+  <div class="eyebrow">05 - PUBLISHING</div><h1>Queue approved work</h1>
+  <p class="intro">Once approved, a job can be added to the publishing pipeline. The queue is separate from the approval decision, so the user controls when approved work is queued.</p>
+  <div class="step"><span class="num">1</span><p>Choose <b>Publishing</b> in the left menu. Approved, scheduled, and published jobs are shown here.</p></div>
+  <div class="step"><span class="num">2</span><p>Review the job details and its approval status. Choose <b>View</b> to return to the job if you need more context.</p></div>
+  <div class="step"><span class="num">3</span><p>For an approved job that is not already scheduled or published, choose <b>Queue</b>. Hermes records it in the publishing queue and marks it scheduled.</p></div>
+  <div class="step"><span class="num">4</span><p>Use <b>Refresh</b> to see updates. For a completed publication with a URL, choose <b>Open</b> to visit it.</p></div>
+  <div class="tip"><strong>Publishing depends on setup</strong><p>Queuing work records the publishing request. Actual delivery and the availability of a public destination depend on the publishing worker, platform credentials, and integration configuration for the environment.</p></div>
+  <div class="section"><h2>When something is missing</h2><ul>
+    <li>If a job does not appear, refresh and confirm it has been approved.</li>
+    <li>If Queue reports an error, check the job's status and the publishing service/worker configuration.</li>
+    <li>If no Open link appears, the publication record may not yet contain a destination URL.</li>
+  </ul></div>
+  <div class="section"><h2>Statuses to expect</h2><p><b>Approved</b> means eligible to queue. <b>Scheduled</b> means it is in the queue. <b>Published</b> means publication has been recorded. The Publishing page displays a URL only when one is available.</p></div>
+  <div class="page-footer"><span>HERMES - WEBSITE USER GUIDE</span><span>06</span></div>
+</section>
+
+<section class="page">
+  <div class="eyebrow">06 - MEASURE & IMPROVE</div><h1>Use Analytics and Learning</h1>
+  <p class="intro">These areas help you review available performance information after content has been published. What appears depends on whether analytics records exist for the job.</p>
+  <div class="two">
+    <div class="card"><h2>Analytics</h2><p>Open <b>Analytics</b> to see the available totals, such as views, likes, comments, and retention. Choose <b>Refresh</b> to reload the records. Empty metrics usually mean no analytics snapshot has been recorded yet.</p></div>
+    <div class="card"><h2>Learning</h2><p>Open <b>Learning</b> to review insights and recommendations derived from available performance data. A confidence value may appear when the insight has one.</p></div>
+  </div>
+  <div class="section"><h2>Generate an insight</h2>
+    <div class="step"><span class="num">1</span><p>Open Learning and find a job that is published, analyzing, or learned.</p></div>
+    <div class="step"><span class="num">2</span><p>Choose <b>Analyze [job]</b> in the Generate new insights section.</p></div>
+    <div class="step"><span class="num">3</span><p>After the confirmation appears, review the insight and any recommendation in the Insights list.</p></div>
+  </div>
+  <div class="tip"><strong>Insights depend on input data</strong><p>Analytics and learning are only as complete as the available performance records. If a published job has no data yet, return later or confirm that performance data has been captured for it.</p></div>
+  <div class="section"><h2>Return to your workspace safely</h2>
+    <p>Open <b>Settings</b> to review your name, email, and verification state. Choose <b>Sign out</b> when you finish; this ends the current session.</p>
+    <p>Use the Dashboard and Jobs list as your starting point when returning to ongoing work. Search by objective or filter by status, then open the relevant job.</p>
+  </div>
+  <div class="section"><h2>Good team habits</h2><ul>
+    <li>Write one clear objective for each distinct content operation.</li>
+    <li>Use the job status as the shared indication of progress.</li>
+    <li>Keep approval decisions and rejection reasons tied to the correct job.</li>
+    <li>Confirm publication and analytics availability before drawing conclusions from performance.</li>
+  </ul></div>
+  <div class="page-footer"><span>HERMES - WEBSITE USER GUIDE</span><span>07</span></div>
+</section>
+
+<section class="page">
+  <div class="eyebrow">07 - QUICK TROUBLESHOOTING</div><h1>When the website doesn't respond</h1>
+  <p class="intro">Many issues are caused by a dependency being unavailable or a job not yet reaching the required status. Use this checklist to find the right next step.</p>
+  <div class="card"><h3>Sign-in or verification does not work</h3><p>Confirm you used the correct email and password. Check Spam/Promotions for the six-digit code, verify that it has not expired, and use resend when available. Password reset starts from the sign-in page.</p></div>
+  <div class="card"><h3>Dashboard or Jobs cannot load</h3><p>Refresh the page. If the API is unavailable, wait for the server to recover or contact the workspace administrator. Confirm the browser can reach the configured website and API.</p></div>
+  <div class="card"><h3>Redis shows ECONNREFUSED at 127.0.0.1:6379</h3><p>For a local setup, start the existing Redis container with <b>docker start hermes-redis</b>. Check it with <b>docker exec hermes-redis redis-cli ping</b>; a healthy response is <b>PONG</b>. Then restart the server and make sure the job worker is running. If Docker says its engine is unavailable, start Docker Desktop first.</p></div>
+  <div class="card"><h3>Run workflow does not advance</h3><p>Confirm Redis and the job worker are running, then refresh the job. Read Last error if status is Failed. After resolving the stated issue, choose Retry job.</p></div>
+  <div class="card"><h3>Approval or Queue action fails</h3><p>Confirm the job is at the correct status and refresh. Approval requires a pending request; publishing requires approval and a suitable publishing setup.</p></div>
+  <div class="card"><h3>Analytics or Learning is empty</h3><p>Confirm the job has publication/performance records. Refresh or revisit after data has been recorded.</p></div>
+  <div class="tip"><strong>When asking for help</strong><p>Share the page name, job status, the visible error message, and the action you took. Do not share passwords, verification codes, API keys, or session cookies.</p></div>
+  <div class="page-footer"><span>HERMES - WEBSITE USER GUIDE</span><span>08</span></div>
+</section>
+
+<section class="page end">
+  <div class="eyebrow">PROJECT OVERVIEW - FINAL PAGE</div><h1>What Hermes is</h1>
+  <p class="intro">Hermes is a content operations workspace that organizes a content idea into a trackable job, coordinates automated work, keeps human approval in the process, and provides a place to review publication and performance information.</p>
+  <div class="sequence"><span>Idea &gt;</span><span>Research &gt;</span><span>Plan & script &gt;</span><span>Production &gt;</span><span>Quality check &gt;</span><span>Human approval &gt;</span><span>Publishing queue &gt;</span><span>Learning</span></div>
+  <div class="section"><h2>How it works for a user</h2><div class="two">
+    <div class="card"><h3>1 - Organize</h3><p>Create a job with an objective and priority. The Dashboard and Jobs list make work easy to find and monitor.</p></div>
+    <div class="card"><h3>2 - Process</h3><p>Start the job workflow. Hermes uses its configured services and agents to carry work through research, content development, production, and quality checks.</p></div>
+    <div class="card"><h3>3 - Govern</h3><p>Review jobs in Approval. Human approval is a distinct step before an approved job can enter the publishing queue.</p></div>
+    <div class="card"><h3>4 - Improve</h3><p>Review available performance records and generate learning insights that can inform future content decisions.</p></div>
+  </div></div>
+  <div class="section"><h2>What the current website includes</h2><p>Account registration and verification; Dashboard and job management; job creation, status tracking, and retry; stage views for Research, Content, Scripts, and Production; approval and rejection; publishing queue controls; analytics and learning views; and account/session settings.</p></div>
+  <div class="section"><h2>What determines the experience</h2><p>Available actions and results depend on job status and on the services and integrations configured for the environment. In the current website, the stage pages are tracking views rather than full editing canvases. Publication links and performance insights appear when corresponding records are available.</p></div>
+  <div class="card"><h3 class="highlight">The purpose</h3><p>Give a team one clear place to move content work forward, see where each job stands, keep a person responsible for approval, and learn from results.</p></div>
+  <div class="page-footer"><span>HERMES - PROJECT OVERVIEW</span><span>09</span></div>
+</section>
+</body>
+</html>

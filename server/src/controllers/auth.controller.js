@@ -22,9 +22,6 @@ const getVerificationDeliveryMessage = (error) => {
   if (error.code === "GMAIL_APP_PASSWORD_REQUIRED") {
     return "Your account is saved, but Gmail needs a 16-character Google App Password. Set SMTP_PASSWORD to an App Password for SMTP_USER in the deployed server environment, restart the server, then retry registration.";
   }
-  if (error.code === "RESEND_FROM_MISSING" || error.code === "RESEND_API_ERROR") {
-    return "Your account is saved, but the email API could not send the code. Check RESEND_API_KEY and set EMAIL_FROM to an address on a verified sending domain, then retry registration.";
-  }
   if (error.code === "SMTP_CONFIG_INVALID") {
     return "Your account is saved, but SMTP_PORT is invalid. Set a valid provider port and matching SMTP_SECURE value, then retry registration.";
   }
@@ -36,7 +33,7 @@ const getVerificationDeliveryMessage = (error) => {
     "ECONNREFUSED", "ECONNRESET", "EHOSTUNREACH", "ENETUNREACH",
     "ENOTFOUND", "EAI_AGAIN", "EPIPE",
   ].includes(error.code)) {
-    return "Your account is saved, but the server could not connect to SMTP. If this service runs on Render Free, outbound SMTP ports are blocked; configure RESEND_API_KEY and EMAIL_FROM to send through HTTPS instead. Otherwise check SMTP_HOST, SMTP_PORT and SMTP_SECURE, then retry registration.";
+    return "Your account is saved, but the server could not connect to the SMTP email server. Confirm the backend host allows outbound SMTP and check SMTP_HOST, SMTP_PORT and SMTP_SECURE, then retry registration.";
   }
   return "Your account is saved, but the verification email could not be sent. Check the server's SMTP settings and retry registration.";
 };

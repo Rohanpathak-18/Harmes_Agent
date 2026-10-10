@@ -649,10 +649,6 @@ SMTP_SECURE=true
 SMTP_USER=your_email
 SMTP_PASSWORD=your_app_password
 
-# If the host blocks SMTP (such as Render Free), use the Resend HTTPS API.
-RESEND_API_KEY=your_resend_api_key
-EMAIL_FROM=Hermes <no-reply@your-verified-domain.com>
-
 Never commit real credentials.
 
 ---

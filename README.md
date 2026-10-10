@@ -689,7 +689,10 @@ Publishing worker:
 cd server
 npm run publish-worker
 
-Redis must be running for BullMQ queues.
+Redis must be running for BullMQ queues. The server accepts either `REDIS_HOST`
+plus `REDIS_PORT`, or a full `REDIS_URL` (`redis://` / `rediss://`). For local
+development with Render Key Value, use its external URL and allow your local IP;
+Render's internal URL only resolves from Render services.
 
 ---
 

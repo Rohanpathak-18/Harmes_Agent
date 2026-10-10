@@ -5,14 +5,10 @@ require("../bootstrap");
 
 const { Worker } = require("bullmq");
 const connectDB = require("../config/database");
+const { getRedisConnection } = require("../config/redis");
 const { runJobWorkflow } = require("../../../workflows/orchestrator/orchestrator");
 
 const databaseReady = connectDB();
-
-const connection = {
-    host: process.env.REDIS_HOST || "127.0.0.1",
-    port: Number(process.env.REDIS_PORT || 6379),
-};
 
 const worker = new Worker(
     "hermes-jobs",
@@ -31,7 +27,7 @@ const worker = new Worker(
         return result;
     },
     {
-        connection,
+        connection: getRedisConnection(),
         concurrency: 2,
     }
 );

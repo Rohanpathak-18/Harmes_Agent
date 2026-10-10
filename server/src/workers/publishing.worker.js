@@ -6,16 +6,12 @@ const { Worker } = require("bullmq");
 
 const connectDB = require("../config/database");
 const databaseReady = connectDB();
+const { getRedisConnection } = require("../config/redis");
 
 const Job = require("../models/Job");
 const Video = require("../models/Video");
 
 const { runAgent } = require("../services/agent.service");
-
-const connection = {
-  host: process.env.REDIS_HOST || "127.0.0.1",
-  port: Number(process.env.REDIS_PORT || 6379),
-};
 
 const worker = new Worker(
   "hermes-publishing",
@@ -53,7 +49,7 @@ const worker = new Worker(
     return result;
   },
   {
-    connection,
+    connection: getRedisConnection(),
     concurrency: 1,
   },
 );

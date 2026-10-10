@@ -1,4 +1,5 @@
 import React, {
+  useEffect,
   useState,
 } from "react";
 
@@ -10,10 +11,21 @@ import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 
 const AppLayout = () => {
+  const [theme, setTheme] = useState(() =>
+    window.localStorage.getItem("hermes-theme") === "light" ? "light" : "dark"
+  );
   const [
     sidebarOpen,
     setSidebarOpen,
   ] = useState(false);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    window.localStorage.setItem("hermes-theme", theme);
+    return () => {
+      delete document.documentElement.dataset.theme;
+    };
+  }, [theme]);
 
   return (
     <div className="app-shell">
@@ -26,6 +38,8 @@ const AppLayout = () => {
 
       <div className="app-main">
         <Topbar
+          theme={theme}
+          onToggleTheme={() => setTheme((current) => current === "dark" ? "light" : "dark")}
           onMenuClick={() =>
             setSidebarOpen(true)
           }

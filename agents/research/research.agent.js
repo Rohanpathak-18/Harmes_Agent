@@ -8,10 +8,6 @@ const {
     createResearchPack,
 } = require("../../server/src/services/research.service");
 
-const {
-    indexResearchPack,
-} = require("../../memory/services/indexResearch.service");
-
 class ResearchAgent extends Agent {
     constructor() {
         super({
@@ -23,7 +19,6 @@ class ResearchAgent extends Agent {
                 "research.read",
                 "sources.collect",
                 "web.search",
-                "memory.write",
             ],
         });
     }
@@ -41,7 +36,7 @@ class ResearchAgent extends Agent {
             );
         }
 
-        // 1. Search the web
+        console.log(`[RESEARCH] Searching sources for job ${context.jobId}`);
         const searchResult =
             await executeTool(
                 "web-search",
@@ -51,7 +46,7 @@ class ResearchAgent extends Agent {
                 }
             );
 
-        // 2. Create Research Pack
+        console.log(`[RESEARCH] Saving ${searchResult.results.length} sources for job ${context.jobId}`);
         const researchPack =
             await createResearchPack({
                 jobId: context.jobId,
@@ -63,12 +58,6 @@ class ResearchAgent extends Agent {
                     searchResult.results,
             });
 
-        // 3. Convert research into vectors
-        const memoryResult =
-            await indexResearchPack(
-                researchPack._id
-            );
-
         return {
             agent: this.id,
 
@@ -79,11 +68,7 @@ class ResearchAgent extends Agent {
             researchPackId:
                 researchPack._id,
 
-            sourcesFound:
-                searchResult.results.length,
-
-            chunksIndexed:
-                memoryResult.chunksIndexed,
+            sourcesFound: researchPack.sources.length,
         };
     }
 }

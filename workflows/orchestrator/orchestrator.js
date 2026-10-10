@@ -4,6 +4,7 @@ const { runAgent } = require("../../server/src/services/agent.service");
 
 const ContentPlan = require("../../server/src/models/ContentPlan");
 const Script = require("../../server/src/models/Script");
+const ResearchPack = require("../../server/src/models/ResearchPack");
 
 const learningService = require("../../server/src/services/Learning.service");
 
@@ -17,16 +18,13 @@ const executeWorkflowStage = async (job) => {
         objective: job.objective,
       });
 
-    case "RESEARCH_READY":
-      return await runAgent("context-agent", {
-        query: job.objective,
-        limit: 5,
-      });
-
     case "SCRIPTING": {
+      const researchPack = await ResearchPack.findOne({ job: job._id }).lean();
+      const research = researchPack?.sources || [];
       const plannerResult = await runAgent("content-planner-agent", {
         jobId: job._id,
         objective: job.objective,
+        research,
       });
 
       const contentPlan = await ContentPlan.findOne({
@@ -40,6 +38,7 @@ const executeWorkflowStage = async (job) => {
       const writerResult = await runAgent("writer-agent", {
         jobId: job._id,
         contentPlan,
+        research,
       });
 
       return {
@@ -120,8 +119,8 @@ const runJobWorkflow = async (jobId) => {
 
     // RESEARCH_READY → SCRIPTING
     if (job.status === "RESEARCH_READY") {
-      result = await executeWorkflowStage(job);
-
+      // RESEARCH_READY is a transition marker. Research was saved by the
+      // research agent, and its source pack is passed directly to planning.
       job.status = "SCRIPTING";
 
       await job.save();

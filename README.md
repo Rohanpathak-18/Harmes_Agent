@@ -662,6 +662,11 @@ Backend:
 
 http://localhost:5000
 
+The API starts the workflow queue worker in the same process by default, so
+`npm run dev` can process assigned jobs without a second terminal. Set
+`RUN_INLINE_JOB_WORKER=false` only when a separate `npm run worker` service is
+already consuming the `hermes-jobs` queue.
+
 ---
 
 ▶️ Run the Frontend

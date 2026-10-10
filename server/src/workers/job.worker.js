@@ -8,7 +8,9 @@ const connectDB = require("../config/database");
 const { getRedisConnection } = require("../config/redis");
 const { runJobWorkflow } = require("../../../workflows/orchestrator/orchestrator");
 
-const databaseReady = connectDB();
+const databaseReady = require("mongoose").connection.readyState === 1
+    ? Promise.resolve()
+    : connectDB();
 
 const worker = new Worker(
     "hermes-jobs",

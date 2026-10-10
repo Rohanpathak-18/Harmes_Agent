@@ -9,7 +9,8 @@ const search = async ({ query, maxResults = 5 }) => {
             search_depth: "basic",
             max_results: maxResults,
             include_answer: false,
-        }
+        },
+        { timeout: 30000 }
     );
 
     return response.data;

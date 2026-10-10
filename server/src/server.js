@@ -65,5 +65,9 @@ const PORT = process.env.PORT || 5000;
 connectDB().then(() => {
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`Hermes Core running on port ${PORT}`);
+    if (process.env.RUN_INLINE_JOB_WORKER !== "false") {
+      require("./workers/job.worker");
+      console.log("Hermes workflow worker started in API process");
+    }
   });
 });

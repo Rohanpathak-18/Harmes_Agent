@@ -1,4 +1,5 @@
 const nodemailer = require("nodemailer");
+const axios = require("axios");
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
 
@@ -21,10 +22,21 @@ const createTransporter = () => {
         throw error;
     }
 
+    const port = Number(process.env.SMTP_PORT || 465);
+    if (!Number.isInteger(port) || port < 1 || port > 65535) {
+        const error = new Error("SMTP_PORT must be a valid port number.");
+        error.code = "SMTP_CONFIG_INVALID";
+        throw error;
+    }
+    const configuredSecure = process.env.SMTP_SECURE;
+    const secure = configuredSecure == null || configuredSecure.trim() === ""
+        ? port === 465
+        : configuredSecure.trim().toLowerCase() === "true";
+
     return nodemailer.createTransport({
         host,
-        port: Number(process.env.SMTP_PORT || 465),
-        secure: String(process.env.SMTP_SECURE).toLowerCase() === "true",
+        port,
+        secure,
         connectionTimeout: 10000,
         greetingTimeout: 10000,
         socketTimeout: 20000,
@@ -50,17 +62,26 @@ const sendVerificationEmail = async ({
     const subject = isPasswordReset ? "Your Hermes password reset code" : "Hermes email verification code";
     const action = isPasswordReset ? "reset your Hermes password" : "verify your Hermes email";
 
-    const transporter = createTransporter();
     const smtpHost = (process.env.SMTP_HOST || "").trim().toLowerCase();
     const smtpUser = (process.env.SMTP_USER || "").trim();
-    const delivery = await transporter.sendMail({
+    const resendApiKey = (process.env.RESEND_API_KEY || "").trim();
+    const from = resendApiKey
+        ? (process.env.EMAIL_FROM || process.env.SMTP_FROM || "").trim()
+        : (smtpHost === "smtp.gmail.com"
+            ? `Hermes <${smtpUser}>`
+            : (process.env.SMTP_FROM || `Hermes <${smtpUser}>`));
+    if (resendApiKey && !from) {
+        const error = new Error("EMAIL_FROM must be set when RESEND_API_KEY is configured.");
+        error.code = "RESEND_FROM_MISSING";
+        throw error;
+    }
+
+    const message = {
         // Gmail only allows the authenticated account (or a configured alias)
         // as the sender. Use the authenticated address to avoid mismatched From.
-        from: smtpHost === "smtp.gmail.com"
-            ? `Hermes <${smtpUser}>`
-            : (process.env.SMTP_FROM || `Hermes <${smtpUser}>`),
+        from,
 
-        replyTo: smtpUser,
+        ...(smtpUser && { replyTo: smtpUser }),
 
         to: email,
 
@@ -111,7 +132,43 @@ If you did not create a Hermes account, you can ignore this email.
                 <p>— Hermes</p>
             </div>
         `,
-    });
+    };
+
+    if (resendApiKey) {
+        try {
+            const response = await axios.post(
+                "https://api.resend.com/emails",
+                {
+                    from: message.from,
+                    to: [email],
+                    subject: message.subject,
+                    text: message.text,
+                    html: message.html,
+                    ...(smtpUser && { reply_to: smtpUser }),
+                },
+                {
+                    timeout: 15000,
+                    headers: {
+                        Authorization: `Bearer ${resendApiKey}`,
+                        "Content-Type": "application/json",
+                    },
+                },
+            );
+            if (!response.data?.id) {
+                throw new Error("Resend did not return an email id");
+            }
+            console.info("Verification email accepted by Resend");
+            return response.data;
+        } catch (cause) {
+            const error = new Error("Resend rejected or could not deliver the email request.");
+            error.code = "RESEND_API_ERROR";
+            error.status = cause.response?.status;
+            throw error;
+        }
+    }
+
+    const transporter = createTransporter();
+    const delivery = await transporter.sendMail(message);
 
     const wasAccepted = (delivery.accepted || []).some(
         (recipient) => String(recipient).toLowerCase() === email.trim().toLowerCase()
@@ -126,6 +183,12 @@ If you did not create a Hermes account, you can ignore this email.
 };
 
 const verifyEmailTransport = async () => {
+    if ((process.env.RESEND_API_KEY || "").trim()) {
+        if (!(process.env.EMAIL_FROM || process.env.SMTP_FROM || "").trim()) {
+            throw new Error("EMAIL_FROM must be set when RESEND_API_KEY is configured.");
+        }
+        return true;
+    }
     const transporter = createTransporter();
     await transporter.verify();
 

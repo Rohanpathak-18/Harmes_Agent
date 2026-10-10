@@ -1,7 +1,6 @@
 import api from "./client";
 
-// Registration and unverified login send an email before responding. SMTP
-// connection and socket timeouts are longer than the generic API timeout.
+// Password reset emails can take longer than a typical API request.
 const AUTH_REQUEST_TIMEOUT_MS = 45000;
 
 export const register = async (data) => {
@@ -35,30 +34,6 @@ export const getMe = async () => {
 export const logout = async () => {
     const response = await api.post(
         "/auth/logout"
-    );
-
-    return response.data;
-};
-
-export const verifyEmail = async (data) => {
-    const response = await api.post(
-        "/auth/verify-email",
-        data,
-        { timeout: AUTH_REQUEST_TIMEOUT_MS }
-    );
-
-    return response.data;
-};
-
-export const resendVerification = async (
-    email
-) => {
-    const response = await api.post(
-        "/auth/resend-verification",
-        {
-            email,
-        },
-        { timeout: AUTH_REQUEST_TIMEOUT_MS }
     );
 
     return response.data;

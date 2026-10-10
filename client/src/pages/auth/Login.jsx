@@ -46,18 +46,6 @@ const Login = () => {
     } catch (error) {
       const data = error.response?.data;
 
-      if (error.response?.status === 403 && data?.requiresEmailVerification) {
-        toast.success("Verify your email to continue.");
-
-        navigate(
-          `/verify-email?email=${encodeURIComponent(
-            data.email || form.email.trim().toLowerCase(),
-          )}`,
-        );
-
-        return;
-      }
-
       toast.error(
         error.response?.status === 404
           ? "The website could not find the API. Set VITE_API_URL to the backend address ending in /api, then redeploy the frontend."

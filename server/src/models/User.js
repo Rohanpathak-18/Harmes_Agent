@@ -25,11 +25,6 @@ const userSchema = new mongoose.Schema(
             select: false,
         },
 
-        isEmailVerified: {
-            type: Boolean,
-            default: false,
-        },
-
         status: {
             type: String,
             enum: ["active", "suspended", "deleted"],

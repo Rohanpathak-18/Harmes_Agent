@@ -47,7 +47,7 @@ const sendVerificationEmail = async ({
     email,
     name,
     otp,
-    purpose = "email_verification",
+    purpose = "password_reset",
 }) => {
     if (!email) {
         throw new Error("Recipient email is required");
@@ -132,12 +132,12 @@ If you did not create a Hermes account, you can ignore this email.
         (recipient) => String(recipient).toLowerCase() === email.trim().toLowerCase()
     );
     if (!wasAccepted) {
-        const error = new Error("The SMTP server did not accept the verification email recipient.");
+        const error = new Error("The SMTP server did not accept the password reset email recipient.");
         error.code = "EMAIL_RECIPIENT_REJECTED";
         throw error;
     }
 
-    console.info("Verification email accepted by SMTP provider");
+    console.info("Password reset email accepted by SMTP provider");
 };
 
 const verifyEmailTransport = async () => {

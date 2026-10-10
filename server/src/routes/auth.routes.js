@@ -3,8 +3,6 @@ const express = require("express");
 const {
     register,
     login,
-    verifyEmail,
-    resendVerificationOTP,
     logout,
     getMe,
     forgotPassword,
@@ -30,18 +28,6 @@ router.post(
     "/login",
     authRateLimiter,
     login
-);
-
-router.post(
-    "/verify-email",
-    otpRateLimiter,
-    verifyEmail
-);
-
-router.post(
-    "/resend-verification",
-    otpRateLimiter,
-    resendVerificationOTP
 );
 
 router.post(

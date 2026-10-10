@@ -3,6 +3,7 @@ import { ArrowRight, Building2, Eye, EyeOff, LockKeyhole, Mail, UserRound } from
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { register } from "../../api/auth";
+import useAuthStore from "../../store/authStore";
 
 const authHeroImage = "https://images.unsplash.com/photo-1695014192203-291edf9e4842?auto=format&fit=crop&w=1600&q=85";
 
@@ -10,6 +11,7 @@ const initialForm = { name: "", email: "", organization: "", password: "", confi
 
 export default function Register() {
   const navigate = useNavigate();
+  const login = useAuthStore((state) => state.login);
   const [form, setForm] = useState(initialForm);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -34,13 +36,14 @@ export default function Register() {
     setFormError("");
     try {
       await register({ name, email, organizationName, password: form.password });
-      toast.success("Your verification code is on its way.");
-      navigate(`/verify-email?email=${encodeURIComponent(email)}`, { replace: true });
+      await login({ email, password: form.password });
+      toast.success("Your workspace is ready.");
+      navigate("/", { replace: true });
     } catch (error) {
       const message = error.response?.status === 404
         ? "The website could not find the API. Set VITE_API_URL to the backend address ending in /api, then redeploy the frontend."
         : error.code === "ECONNABORTED" || error.code === "ETIMEDOUT"
-          ? "Email verification is taking longer than expected. Your account may already be created; try signing in or request a new verification code."
+          ? "The server took too long to respond. Your account may have been created; try signing in."
           : error.response?.data?.message || "We couldn't create your workspace. Please try again.";
       setFormError(message);
       toast.error(message);
@@ -63,14 +66,14 @@ export default function Register() {
             <img src={authHeroImage} alt="A creative team collaborating around a camera on set" />
             <div className="register-art-caption"><span className="register-live-dot" /><div><strong>One workspace. Clear momentum.</strong><small>From first signal to published work.</small></div></div>
           </div>
-          <div className="register-steps" aria-label="Three steps to get started"><span><b>01</b> Create workspace</span><i /><span><b>02</b> Verify email</span><i /><span><b>03</b> Start creating</span></div>
+          <div className="register-steps" aria-label="Two steps to get started"><span><b>01</b> Create workspace</span><i /><span><b>02</b> Start creating</span></div>
         </div>
       </section>
 
       <section className="auth-form-side register-form-side">
         <div className="auth-form-wrapper register-form-wrapper">
           <div className="mobile-auth-logo"><span className="brand-mark">H</span><span>HERMES</span></div>
-          <header className="register-heading"><span className="eyebrow">START WITH A FRESH PAGE</span><h2>Create your workspace</h2><p>Set up your account. We'll email you a code to verify your address.</p></header>
+          <header className="register-heading"><span className="eyebrow">START WITH A FRESH PAGE</span><h2>Create your workspace</h2><p>Set up your account and choose a password to get started.</p></header>
           <form className="auth-form register-form" onSubmit={handleSubmit} noValidate>
             <div className="register-fields">
               <div className="register-field"><label htmlFor="register-name">Your name</label><div className="register-input"><UserRound size={17} /><input id="register-name" name="name" value={form.name} onChange={update} placeholder="Alex Morgan" autoComplete="name" required minLength={2} maxLength={100} disabled={loading} /></div></div>
@@ -82,7 +85,7 @@ export default function Register() {
 
             {formError && <div className="register-error" role="alert">{formError}</div>}
             <button className="register-submit" type="submit" disabled={loading}>{loading ? <><span className="register-spinner" /> Creating your workspace…</> : <>Create account <ArrowRight size={17} /></>}</button>
-            <p className="register-terms">We'll send a one-time code to verify your email address.</p>
+            <p className="register-terms">Use your email and password to sign in next time.</p>
           </form>
           <p className="auth-footer register-footer">Already have a workspace? <Link to="/login">Sign in</Link></p>
         </div>

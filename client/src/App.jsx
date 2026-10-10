@@ -14,7 +14,6 @@ import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
-import VerifyEmail from "./pages/auth/VerifyEmail";
 
 import Dashboard from "./pages/Dashboard";
 import Jobs from "./pages/Jobs";
@@ -170,16 +169,6 @@ const App = () => {
           </PublicRoute>
         }
       />
-
-      <Route
-        path="/verify-email"
-        element={
-          <PublicRoute>
-            <VerifyEmail />
-          </PublicRoute>
-        }
-      />
-
 
       {/* PROTECTED APPLICATION */}
 

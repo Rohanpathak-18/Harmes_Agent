@@ -15,29 +15,6 @@ const { generateSessionToken, hashToken } = require("../utils/token");
 
 const { generateOTP, hashOTP } = require("../utils/otp");
 
-const getVerificationDeliveryMessage = (error) => {
-  if (error.code === "SMTP_CONFIG_MISSING") {
-    return "Your account is saved, but the server is missing SMTP_HOST, SMTP_USER or SMTP_PASSWORD. Add these variables to the deployed server environment and retry registration.";
-  }
-  if (error.code === "GMAIL_APP_PASSWORD_REQUIRED") {
-    return "Your account is saved, but Gmail needs a 16-character Google App Password. Set SMTP_PASSWORD to an App Password for SMTP_USER in the deployed server environment, restart the server, then retry registration.";
-  }
-  if (error.code === "SMTP_CONFIG_INVALID") {
-    return "Your account is saved, but SMTP_PORT is invalid. Set a valid provider port and matching SMTP_SECURE value, then retry registration.";
-  }
-  if (error.code === "EAUTH") {
-    return "Your account is saved, but Google rejected SMTP sign-in. Confirm SMTP_USER and SMTP_PASSWORD belong together, update them in the deployed server environment, restart the server, then retry registration.";
-  }
-  if ([
-    "ETIMEDOUT", "ESOCKET", "ECONNECTION", "ECONNECTIONTIMEDOUT",
-    "ECONNREFUSED", "ECONNRESET", "EHOSTUNREACH", "ENETUNREACH",
-    "ENOTFOUND", "EAI_AGAIN", "EPIPE",
-  ].includes(error.code)) {
-    return "Your account is saved, but the server could not connect to the SMTP email server. Confirm the backend host allows outbound SMTP and check SMTP_HOST, SMTP_PORT and SMTP_SECURE, then retry registration.";
-  }
-  return "Your account is saved, but the verification email could not be sent. Check the server's SMTP settings and retry registration.";
-};
-
 const isValidOTP = (otp) => /^\d{6}$/.test(String(otp ?? "").trim());
 
 const register = async (req, res) => {
@@ -77,7 +54,6 @@ const register = async (req, res) => {
 
     if (existingUser) {
       if (
-        existingUser.isEmailVerified ||
         !(await bcrypt.compare(password, existingUser.password))
       ) {
         return res.status(409).json({
@@ -91,39 +67,34 @@ const register = async (req, res) => {
         user: existingUser._id,
         status: "active",
       });
-      if (!membership) {
-        const slug = `${organizationName
-          .toLowerCase()
-          .trim()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/^-+|-+$/g, "")}-${Date.now()}`;
-        const organization = await Organization.create({
-          name: organizationName.trim(),
-          slug,
-          owner: existingUser._id,
-        });
-        membership = await Membership.create({
-          user: existingUser._id,
-          organization: organization._id,
-          role: "owner",
-          status: "active",
+      if (membership) {
+        return res.status(409).json({
+          success: false,
+          message: "An account with this email already exists. Sign in instead.",
         });
       }
 
-      try {
-        await createAndSendVerificationOTP(existingUser);
-      } catch (error) {
-        console.error("Registration verification email error:", error);
-        return res.status(503).json({
-          success: false,
-          code: error.code || "EMAIL_DELIVERY_FAILED",
-          message: getVerificationDeliveryMessage(error),
-        });
-      }
+      const slug = `${organizationName
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")}-${Date.now()}`;
+      const organization = await Organization.create({
+        name: organizationName.trim(),
+        slug,
+        owner: existingUser._id,
+      });
+      await Membership.create({
+        user: existingUser._id,
+        organization: organization._id,
+        role: "owner",
+        status: "active",
+      });
+
       return res.status(200).json({
         success: true,
-        message: "A new verification code was sent.",
-        data: { email: existingUser.email, requiresEmailVerification: true },
+        message: "Your account is ready. You can now sign in.",
+        data: { email: existingUser.email },
       });
     }
 
@@ -162,26 +133,13 @@ const register = async (req, res) => {
       status: "active",
     });
 
-    try {
-      await createAndSendVerificationOTP(user);
-    } catch (error) {
-      console.error("Registration verification email error:", error);
-      return res.status(503).json({
-        success: false,
-        code: error.code || "EMAIL_DELIVERY_FAILED",
-        message: getVerificationDeliveryMessage(error),
-      });
-    }
-
     return res.status(201).json({
       success: true,
-      message:
-        "Account created. A verification code has been sent to your email.",
+      message: "Account created. You can now sign in.",
       data: {
         userId: user._id,
         organizationId: organization._id,
         email: user.email,
-        requiresEmailVerification: true,
       },
     });
   } catch (error) {
@@ -236,29 +194,6 @@ const login = async (req, res) => {
       });
     }
 
-    // Accounts must verify their email before login OTPs can be used.
-    if (!user.isEmailVerified) {
-      try {
-        await createAndSendVerificationOTP(user);
-      } catch (error) {
-        console.error("Verification email error:", error);
-
-        return res.status(503).json({
-          success: false,
-          message:
-            "Your account is not verified and we could not send a verification code. Please retry shortly.",
-        });
-      }
-
-      return res.status(403).json({
-        success: false,
-        message:
-          "Email verification required. A new verification code has been sent to your email.",
-        requiresEmailVerification: true,
-        email: user.email,
-      });
-    }
-
     return createSession(req, res, user);
   } catch (error) {
     console.error("Login error:", error);
@@ -307,110 +242,9 @@ const createSession = async (req, res, user) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        isEmailVerified: user.isEmailVerified,
       },
     },
   });
-};
-
-const verifyEmail = async (req, res) => {
-  try {
-    const { email, otp } = req.body || {};
-
-    if (!email || !otp) {
-      return res.status(400).json({
-        success: false,
-        message: "Email and verification code are required",
-      });
-    }
-
-    if (!isValidOTP(otp)) {
-      return res.status(400).json({ success: false, message: "Verification code must be 6 digits" });
-    }
-
-    const normalizedEmail = email.toLowerCase().trim();
-
-    const user = await User.findOne({
-      email: normalizedEmail,
-    });
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "Account not found",
-      });
-    }
-
-    if (user.isEmailVerified) {
-      return res.status(400).json({
-        success: false,
-        message: "Email is already verified",
-      });
-    }
-
-    const verificationOTP = await OTP.findOne({
-      user: user._id,
-      purpose: "email_verification",
-      consumed: false,
-    }).sort({
-      createdAt: -1,
-    });
-
-    if (!verificationOTP) {
-      return res.status(400).json({
-        success: false,
-        message: "Verification code has expired. Please request a new code.",
-      });
-    }
-
-    if (verificationOTP.expiresAt < new Date()) {
-      verificationOTP.consumed = true;
-
-      await verificationOTP.save();
-
-      return res.status(400).json({
-        success: false,
-        message: "Verification code has expired. Please request a new code.",
-      });
-    }
-
-    if (verificationOTP.attempts >= 5) {
-      return res.status(429).json({
-        success: false,
-        message: "Too many incorrect attempts. Please request a new code.",
-      });
-    }
-
-    const isValid = hashOTP(String(otp).trim()) === verificationOTP.codeHash;
-
-    if (!isValid) {
-      verificationOTP.attempts += 1;
-
-      await verificationOTP.save();
-
-      return res.status(400).json({
-        success: false,
-        message: "Invalid verification code",
-      });
-    }
-
-    verificationOTP.consumed = true;
-
-    await verificationOTP.save();
-
-    user.isEmailVerified = true;
-
-    await user.save();
-
-    return createSession(req, res, user);
-  } catch (error) {
-    console.error("Verify email error:", error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Unable to verify email",
-    });
-  }
 };
 
 const logout = async (req, res) => {
@@ -463,7 +297,6 @@ const getMe = async (req, res) => {
       id: req.user._id,
       name: req.user.name,
       email: req.user.email,
-      isEmailVerified: req.user.isEmailVerified,
       status: req.user.status,
     },
   });
@@ -719,64 +552,12 @@ const createAndSendOTP = async (user, purpose) => {
   return otpDocument;
 };
 
-const createAndSendVerificationOTP = (user) =>
-  createAndSendOTP(user, "email_verification");
-
-const resendVerificationOTP = async (req, res) => {
-  try {
-    const { email } = req.body;
-
-    if (!email) {
-      return res.status(400).json({
-        success: false,
-        message: "Email is required",
-      });
-    }
-
-    const normalizedEmail = email.toLowerCase().trim();
-
-    const user = await User.findOne({
-      email: normalizedEmail,
-    });
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "Account not found",
-      });
-    }
-
-    if (user.isEmailVerified) {
-      return res.status(400).json({
-        success: false,
-        message: "Email is already verified",
-      });
-    }
-
-    await createAndSendVerificationOTP(user);
-
-    return res.status(200).json({
-      success: true,
-      message: "A new verification code has been sent to your email.",
-    });
-  } catch (error) {
-    console.error("Resend verification OTP error:", error);
-
-    return res.status(503).json({
-      success: false,
-      message: "Unable to send verification code",
-    });
-  }
-};
-
 module.exports = {
   register,
   login,
-  verifyEmail,
   logout,
   getMe,
   forgotPassword,
   verifyResetOTP,
   resetPassword,
-  resendVerificationOTP,
 };

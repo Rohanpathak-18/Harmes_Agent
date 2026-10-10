@@ -20,7 +20,7 @@ export default function Settings() {
   return <div className="page-shell">
     <div className="page-header"><div><div className="eyebrow">WORKSPACE</div><h1>Settings</h1><p>Manage your account access and session.</p></div></div>
     <div className="settings-grid">
-      <Card className="settings-card"><div className="settings-card-title"><UserRound size={18} /><h2>Account</h2></div><dl className="settings-fields"><div><dt>Name</dt><dd>{user?.name || "—"}</dd></div><div><dt>Email</dt><dd>{user?.email || "—"}</dd></div><div><dt>Email verification</dt><dd>{user?.isEmailVerified ? "Verified" : "Not verified"}</dd></div></dl></Card>
+      <Card className="settings-card"><div className="settings-card-title"><UserRound size={18} /><h2>Account</h2></div><dl className="settings-fields"><div><dt>Name</dt><dd>{user?.name || "—"}</dd></div><div><dt>Email</dt><dd>{user?.email || "—"}</dd></div></dl></Card>
       <Card className="settings-card"><div className="settings-card-title"><ShieldCheck size={18} /><h2>Session</h2></div><p className="settings-description">Your sign-in session is protected by an HTTP-only cookie. Signing out revokes this session on the server.</p><Button variant="danger" onClick={handleLogout} loading={busy}><LogOut size={16} /> Sign out</Button></Card>
     </div>
   </div>;

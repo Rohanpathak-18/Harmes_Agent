@@ -1,9 +1,14 @@
 import api from "./client";
 
+// Registration and unverified login send an email before responding. SMTP
+// connection and socket timeouts are longer than the generic API timeout.
+const AUTH_REQUEST_TIMEOUT_MS = 45000;
+
 export const register = async (data) => {
     const response = await api.post(
         "/auth/register",
-        data
+        data,
+        { timeout: AUTH_REQUEST_TIMEOUT_MS }
     );
 
     return response.data;
@@ -12,7 +17,8 @@ export const register = async (data) => {
 export const login = async (data) => {
     const response = await api.post(
         "/auth/login",
-        data
+        data,
+        { timeout: AUTH_REQUEST_TIMEOUT_MS }
     );
 
     return response.data;
@@ -37,7 +43,8 @@ export const logout = async () => {
 export const verifyEmail = async (data) => {
     const response = await api.post(
         "/auth/verify-email",
-        data
+        data,
+        { timeout: AUTH_REQUEST_TIMEOUT_MS }
     );
 
     return response.data;
@@ -50,7 +57,8 @@ export const resendVerification = async (
         "/auth/resend-verification",
         {
             email,
-        }
+        },
+        { timeout: AUTH_REQUEST_TIMEOUT_MS }
     );
 
     return response.data;
@@ -61,7 +69,8 @@ export const forgotPassword = async (
 ) => {
     const response = await api.post(
         "/auth/forgot-password",
-        data
+        data,
+        { timeout: AUTH_REQUEST_TIMEOUT_MS }
     );
 
     return response.data;
@@ -72,7 +81,8 @@ export const verifyResetOTP = async (
 ) => {
     const response = await api.post(
         "/auth/verify-reset-otp",
-        data
+        data,
+        { timeout: AUTH_REQUEST_TIMEOUT_MS }
     );
 
     return response.data;
@@ -83,7 +93,8 @@ export const resetPassword = async (
 ) => {
     const response = await api.post(
         "/auth/reset-password",
-        data
+        data,
+        { timeout: AUTH_REQUEST_TIMEOUT_MS }
     );
 
     return response.data;

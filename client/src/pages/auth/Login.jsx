@@ -61,8 +61,8 @@ const Login = () => {
       toast.error(
         error.response?.status === 404
           ? "The website could not find the API. Set VITE_API_URL to the backend address ending in /api, then redeploy the frontend."
-          : error.code === "ECONNABORTED"
-          ? "The server took too long to respond. Check the server and try again."
+          : error.code === "ECONNABORTED" || error.code === "ETIMEDOUT"
+          ? "The server took longer than expected to respond. Check your connection and try again."
           : data?.message || "Unable to sign in.",
       );
     } finally {

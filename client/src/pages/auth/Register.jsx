@@ -39,8 +39,8 @@ export default function Register() {
     } catch (error) {
       const message = error.response?.status === 404
         ? "The website could not find the API. Set VITE_API_URL to the backend address ending in /api, then redeploy the frontend."
-        : error.code === "ECONNABORTED"
-          ? "The server took too long to respond. Check the server and try again."
+        : error.code === "ECONNABORTED" || error.code === "ETIMEDOUT"
+          ? "Email verification is taking longer than expected. Your account may already be created; try signing in or request a new verification code."
           : error.response?.data?.message || "We couldn't create your workspace. Please try again.";
       setFormError(message);
       toast.error(message);

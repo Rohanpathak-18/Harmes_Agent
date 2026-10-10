@@ -5,6 +5,7 @@ require("../bootstrap");
 const { Worker } = require("bullmq");
 
 const connectDB = require("../config/database");
+const databaseReady = connectDB();
 
 const Job = require("../models/Job");
 const Video = require("../models/Video");
@@ -19,6 +20,7 @@ const connection = {
 const worker = new Worker(
   "hermes-publishing",
   async (queueJob) => {
+    await databaseReady;
     const { jobId } = queueJob.data;
 
     console.log(`[PUBLISHER] Processing ${jobId}`);
@@ -68,14 +70,11 @@ worker.on("error", (error) => {
   console.error("[PUBLISHER] Worker error:", error.message);
 });
 
-const start = async () => {
-  await connectDB();
-
+databaseReady.then(() => {
   console.log("Hermes Publishing Worker connected to MongoDB");
-
   console.log("Hermes Publishing Worker listening");
-};
-
-start();
+}).catch((error) => {
+  console.error("Hermes Publishing Worker could not connect to MongoDB:", error.message);
+});
 
 module.exports = worker;

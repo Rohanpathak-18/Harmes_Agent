@@ -25,8 +25,6 @@ const systemRoutes = require("./routes/system.routes");
 const app = express();
 app.set("trust proxy", 1);
 
-connectDB();
-
 app.use(helmet());
 
 app.use(
@@ -64,8 +62,8 @@ app.get("/", (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-
-
-app.listen(PORT,"0.0.0.0", () => {
-  console.log(`Hermes Core running on port ${PORT}`);
+connectDB().then(() => {
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Hermes Core running on port ${PORT}`);
+  });
 });

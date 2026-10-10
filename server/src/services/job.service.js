@@ -17,16 +17,18 @@ const createJob = async ({
     return job;
 };
 
-const getJobById = async (jobId, userId) => {
+const getJobById = async (jobId, userId, organizationId) => {
     return Job.findOne({
         _id: jobId,
         user: userId,
+        ...(organizationId && { organization: organizationId }),
     });
 };
 
-const getUserJobs = async (userId) => {
+const getUserJobs = async (userId, organizationId) => {
     return Job.find({
         user: userId,
+        ...(organizationId && { organization: organizationId }),
     }).sort({
         createdAt: -1,
     });

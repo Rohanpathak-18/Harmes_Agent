@@ -31,12 +31,19 @@ const getVerificationDeliveryMessage = (error) => {
   return "Your account is saved, but the verification email could not be sent. Check the server's SMTP settings and retry registration.";
 };
 
+const isValidOTP = (otp) => /^\d{6}$/.test(String(otp ?? "").trim());
+
 const register = async (req, res) => {
   try {
     const { name, email, password, organizationName } = req.body || {};
 
     // 1. Validate required fields
-    if (!name || !email || !password || !organizationName) {
+    if (
+      typeof name !== "string" || !name.trim() ||
+      typeof email !== "string" || !email.trim() ||
+      typeof password !== "string" ||
+      typeof organizationName !== "string" || !organizationName.trim()
+    ) {
       return res.status(400).json({
         success: false,
         message: "Name, email, password and organization name are required",
@@ -52,6 +59,9 @@ const register = async (req, res) => {
     }
 
     const normalizedEmail = email.toLowerCase().trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      return res.status(400).json({ success: false, message: "Enter a valid email address" });
+    }
 
     // 3. Check whether user already exists
     const existingUser = await User.findOne({
@@ -298,13 +308,17 @@ const createSession = async (req, res, user) => {
 
 const verifyEmail = async (req, res) => {
   try {
-    const { email, otp } = req.body;
+    const { email, otp } = req.body || {};
 
     if (!email || !otp) {
       return res.status(400).json({
         success: false,
         message: "Email and verification code are required",
       });
+    }
+
+    if (!isValidOTP(otp)) {
+      return res.status(400).json({ success: false, message: "Verification code must be 6 digits" });
     }
 
     const normalizedEmail = email.toLowerCase().trim();
@@ -360,7 +374,7 @@ const verifyEmail = async (req, res) => {
       });
     }
 
-    const isValid = hashOTP(otp) === verificationOTP.codeHash;
+    const isValid = hashOTP(String(otp).trim()) === verificationOTP.codeHash;
 
     if (!isValid) {
       verificationOTP.attempts += 1;
@@ -501,6 +515,10 @@ const verifyResetOTP = async (req, res) => {
       });
     }
 
+    if (!isValidOTP(otp)) {
+      return res.status(400).json({ success: false, message: "OTP must be 6 digits" });
+    }
+
     const normalizedEmail = email.trim().toLowerCase();
 
     const user = await User.findOne({
@@ -541,7 +559,7 @@ const verifyResetOTP = async (req, res) => {
       });
     }
 
-    const hashedInput = hashOTP(String(otp));
+    const hashedInput = hashOTP(String(otp).trim());
 
     if (hashedInput !== otpRecord.codeHash) {
       otpRecord.attempts += 1;
@@ -576,6 +594,10 @@ const resetPassword = async (req, res) => {
         success: false,
         message: "Email, verification code and new password are required",
       });
+    }
+
+    if (!isValidOTP(otp)) {
+      return res.status(400).json({ success: false, message: "Verification code must be 6 digits" });
     }
 
     if (password.length < 8) {

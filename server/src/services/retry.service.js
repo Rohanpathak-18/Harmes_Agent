@@ -1,5 +1,6 @@
 const Job = require("../models/Job");
 const { enqueueJob } = require("./jobQueue.service");
+const crypto = require("crypto");
 
 const retryJob = async (jobId) => {
     const job = await Job.findById(jobId);
@@ -19,7 +20,18 @@ const retryJob = async (jobId) => {
 
     await job.save();
 
-    const queueJob = await enqueueJob(job._id);
+    let queueJob;
+    try {
+        queueJob = await enqueueJob(
+            job._id,
+            `${job._id}-retry-${crypto.randomUUID()}`
+        );
+    } catch (error) {
+        job.status = "FAILED";
+        job.error = { message: error.message, timestamp: new Date() };
+        await job.save();
+        throw error;
+    }
 
     return {
         job,

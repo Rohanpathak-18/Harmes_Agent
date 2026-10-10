@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ArrowLeft,
   Play,
@@ -48,8 +48,9 @@ const JobDetails = () => {
   const [running, setRunning] = useState(false);
   const [refreshing, setRefreshing] =
     useState(false);
+  const jobStatus = job?.status;
 
-  const loadJob = async (refresh = false) => {
+  const loadJob = useCallback(async (refresh = false) => {
     try {
       if (refresh) {
         setRefreshing(true);
@@ -74,13 +75,22 @@ const JobDetails = () => {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [jobId]);
 
   useEffect(() => {
     if (jobId) {
       loadJob();
     }
-  }, [jobId]);
+  }, [jobId, loadJob]);
+
+  useEffect(() => {
+    if (!["RESEARCHING", "RESEARCH_READY", "SCRIPTING", "PRODUCTION", "FINAL_QA"].includes(jobStatus)) {
+      return undefined;
+    }
+
+    const timer = window.setInterval(() => loadJob(true), 3000);
+    return () => window.clearInterval(timer);
+  }, [jobStatus, jobId, loadJob]);
 
   const handleRunWorkflow = async () => {
     if (!jobId) return;
@@ -98,9 +108,7 @@ const JobDetails = () => {
         }));
       }
 
-      toast.success(
-        "Hermes workflow started"
-      );
+      toast.success("Workflow queued. Hermes is assigning the agents now.");
 
       await loadJob(true);
     } catch (error) {
@@ -108,6 +116,11 @@ const JobDetails = () => {
         "Workflow start failed:",
         error
       );
+
+      if (error.response?.status === 409) {
+        await loadJob(true);
+        return;
+      }
 
       toast.error(
         error.response?.data?.message ||

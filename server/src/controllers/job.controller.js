@@ -4,16 +4,21 @@ const {
     getUserJobs,
 } = require("../services/job.service");
 
-const { enqueueJob } = require("../services/jobQueue.service");
-
 const create = async (req, res, next) => {
     try {
         const { objective, priority } = req.body || {};
 
-        if (!objective || !objective.trim()) {
+        if (typeof objective !== "string" || !objective.trim()) {
             return res.status(400).json({
                 success: false,
                 message: "Objective is required",
+            });
+        }
+
+        if (priority && !["low", "normal", "high"].includes(priority)) {
+            return res.status(400).json({
+                success: false,
+                message: "Priority must be low, normal or high",
             });
         }
 
@@ -24,13 +29,10 @@ const create = async (req, res, next) => {
             priority,
         });
 
-        const queueJob = await enqueueJob(job._id);
-
         return res.status(201).json({
             success: true,
-            message: "Hermes job created and queued",
+            message: "Hermes job created",
             job,
-            queueJobId: queueJob.id,
         });
     } catch (error) {
         next(error);
@@ -40,7 +42,8 @@ const getOne = async (req, res, next) => {
     try {
         const job = await getJobById(
             req.params.id,
-            req.user._id
+            req.user._id,
+            req.organization._id
         );
 
         if (!job) {
@@ -61,7 +64,7 @@ const getOne = async (req, res, next) => {
 
 const getAll = async (req, res, next) => {
     try {
-        const jobs = await getUserJobs(req.user._id);
+        const jobs = await getUserJobs(req.user._id, req.organization._id);
 
         return res.status(200).json({
             success: true,

@@ -1,5 +1,5 @@
 const Job = require("../models/Job");
-const { enqueueJob } = require("./jobQueue.service");
+const { publishingQueue } = require("../queues/publishing.queue");
 
 const schedulePublishing = async ({
     jobId,
@@ -20,7 +20,17 @@ const schedulePublishing = async ({
     job.status = "SCHEDULED";
     await job.save();
 
-    const queueJob = await enqueueJob(job._id);
+    const queueJob = await publishingQueue.add(
+        "publish-job",
+        { jobId: job._id.toString() },
+        {
+            jobId: job._id.toString(),
+            attempts: 3,
+            backoff: { type: "exponential", delay: 5000 },
+            removeOnComplete: 100,
+            removeOnFail: 100,
+        }
+    );
 
     return {
         job,

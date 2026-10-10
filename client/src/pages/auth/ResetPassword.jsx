@@ -200,9 +200,13 @@ const ResetPassword = () => {
                 type="text"
                 name="otp"
                 value={form.otp}
-                onChange={handleChange}
+                onChange={(event) => setForm((current) => ({
+                  ...current,
+                  otp: event.target.value.replace(/\D/g, "").slice(0, 6),
+                }))}
                 placeholder="Enter OTP"
                 inputMode="numeric"
+                autoComplete="one-time-code"
                 maxLength={6}
               />
             </label>

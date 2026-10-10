@@ -6,6 +6,7 @@ const retry = async (req, res, next) => {
         const job = await Job.findOne({
             _id: req.params.id,
             user: req.user._id,
+            organization: req.organization?._id,
         });
 
         if (!job) {
